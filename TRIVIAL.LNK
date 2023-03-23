@@ -1,0 +1,17 @@
+        startup
+
+        2/start
+        2/db
+
+        main
+        dialogs
+        desk
+        jfen
+        os
+        initdesk
+
+        ticons
+        sons
+        dlgdata
+
+        keep=3:load:Trivial

@@ -1,0 +1,59 @@
+.SILENT:
+.SUPPRESS:
+.DESTROY:
+
+s = 3/src/
+l = 3/load/
+
+${l}trivial: startup.root main.root dialogs.root desk.root jfen.root os.root initdesk.root ticons.root sons.root dlgdata.root
+        echo Edition de liens
+        del 3/load/trivial
+        compile trivial.lnk
+
+startup.root: ${s}startup.asm ${s}startup.macros ${s}trivial.pak.asm bidon
+       * macgen ${s}startup.asm ${s}startup.macros 2/ainclude/m16.=
+        echo Assemblage de startup.asm
+        assemble ${s}startup.asm keep=$*
+
+main.root: ${s}main.c ${s}trivial.h ${s}initdesk.h
+        echo Compilation de main.c
+        compile ${s}main.c keep=$*
+
+dialogs.root: ${s}dialogs.c ${s}trivial.h
+        echo Compilation de dialogs.c
+        compile ${s}dialogs.c keep=$*
+
+desk.root: ${s}desk.c ${s}trivial.h
+        echo Compilation de desk.c
+        compile ${s}desk.c keep=$*
+
+jfen.root: ${s}jfen.c ${s}trivial.h
+        echo Compilation de jfen.c
+        compile ${s}jfen.c keep=$*
+
+os.root: ${s}os.c ${s}trivial.h
+        echo Compilation de os.c
+        compile ${s}os.c keep=$*
+
+initdesk.root: ${s}initdesk.c ${s}initdesk.h
+        echo Compilation de initdesk.c
+        compile ${s}initdesk.c keep=$*
+
+ticons.root: ${s}ticons.asm ${s}fond.pak.asm
+        echo Assemblage de ticons.asm
+        assemble ${s}ticons.asm keep=$*
+
+sons.root: ${s}sons.asm ${s}clap.asm
+        echo Assemblage de sons.asm
+        assemble ${s}sons.asm keep=$*
+
+dlgdata.root: ${s}dlgdata.asm
+        echo Assemblage de dlgdata.asm
+        assemble ${s}dlgdata.asm keep=$*
+
+bidon:
+        echo Reconstruction de Trivial Pursuit
+        echo ---------------------------------
+        echo
+        show time
+        echo
