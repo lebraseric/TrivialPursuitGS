@@ -34,37 +34,37 @@ trivial: $(OBJECTS)
 obj/%.ROOT: obj/%.A
 
 macros/startup.mac: src/startup.asm
-	$(MACGEN) src/startup.asm macros/startup.mac 2/ainclude/m16.= 2/appleutil/m16.Util2
+	$(MACGEN) src/startup.asm $@ 2/ainclude/m16.= 2/appleutil/m16.Util2
 
 obj/startup.a: src/startup.asm macros/startup.mac src/trivial.pak.asm
-	$(ASSEMBLE) src/startup.asm keep=$*
+	$(ASSEMBLE) src/startup.asm keep=obj/$$
 
 obj/main.a: src/main.c src/trivial.h src/initdesk.h
-	$(COMPILE) $(CFLAGS) src/main.c keep=$*
+	$(COMPILE) $(CFLAGS) src/main.c keep=obj/$$
 
 obj/dialogs.a: src/dialogs.c src/dialogs.h
-	$(COMPILE) $(CFLAGS) src/dialogs.c keep=$*
+	$(COMPILE) $(CFLAGS) src/dialogs.c keep=obj/$$
 
 obj/desk.a: src/desk.c src/trivial.h
-	$(COMPILE) $(CFLAGS) src/desk.c keep=$*
+	$(COMPILE) $(CFLAGS) src/desk.c keep=obj/$$
 
 obj/jfen.a: src/jfen.c src/trivial.h
-	$(COMPILE) $(CFLAGS) src/jfen.c keep=$*
+	$(COMPILE) $(CFLAGS) src/jfen.c keep=obj/$$
 
 obj/os.a: src/os.c src/trivial.h
-	$(COMPILE) $(CFLAGS) src/os.c keep=$*
+	$(COMPILE) $(CFLAGS) src/os.c keep=obj/$$
 
 obj/initdesk.a: src/initdesk.c src/initdesk.h
-	$(COMPILE) $(CFLAGS) src/initdesk.c keep=$*
+	$(COMPILE) $(CFLAGS) src/initdesk.c keep=obj/$$
 
 obj/ticons.a: src/ticons.asm src/fond.pak.asm
-	$(ASSEMBLE) src/ticons.asm keep=$*
+	$(ASSEMBLE) src/ticons.asm keep=obj/$$
 
 obj/sons.a: src/sons.asm src/clap.asm
-	$(ASSEMBLE) src/sons.asm keep=$*
+	$(ASSEMBLE) src/sons.asm keep=obj/$$
 
 macros/dlgdata.mac: src/dlgdata.asm
-	$(MACGEN) src/dlgdata.asm macros/dlgdata.mac 2/ainclude/m16.= 2/appleutil/m16.Util2
+	$(MACGEN) src/dlgdata.asm $@ 2/ainclude/m16.= 2/appleutil/m16.Util2
 
 obj/dlgdata.a: src/dlgdata.asm macros/dlgdata.mac
-	$(ASSEMBLE) src/dlgdata.asm keep=$*
+	$(ASSEMBLE) src/dlgdata.asm keep=obj/$$
