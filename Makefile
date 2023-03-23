@@ -7,7 +7,6 @@ ASSEMBLE = iix assemble
 LINK = iix link
 MACGEN = iix macgen
 
-# CFLAGS = -I -P cc=-i"src" cc=-dFUJINET
 CFLAGS = -I -P cc=-i"src"
 
 OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a \
@@ -57,12 +56,6 @@ obj/os.a: src/os.c src/trivial.h
 
 obj/initdesk.a: src/initdesk.c src/initdesk.h
 	$(COMPILE) $(CFLAGS) src/initdesk.c keep=$*
-
-obj/sp.a: src/sp.c src/sp.h
-	$(COMPILE) $(CFLAGS) src/sp.c keep=$*
-
-obj/io.a: src/io.c src/io.h
-	$(COMPILE) $(CFLAGS) src/io.c keep=$*
 
 obj/ticons.a: src/ticons.asm src/fond.pak.asm
 	$(ASSEMBLE) src/ticons.asm keep=$*
