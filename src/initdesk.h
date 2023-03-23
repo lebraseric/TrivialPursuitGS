@@ -6,8 +6,14 @@
 /*                                                                           */
 /* ************************************************************************* */
 
+#ifndef INITDESK_H
+#define INITDESK_H
+
+#include <types.h>
 
 extern Word MyID;
 
 Word InitTools();
 void MemoryFull();
+
+#endif /* INITDESK_H */

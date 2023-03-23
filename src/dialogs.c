@@ -6,14 +6,14 @@
 /*  Header application  */
 
 #include "trivial.h"
+#include "dialogs.h"
 
 
 /*  Headers C standards  */
 
 #include <ctype.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 
 /*  Headers Toolbox  */
@@ -26,7 +26,9 @@
 #include <font.h>
 #include <qdaux.h>
 #include <gsos.h>
-#include <mjuke.h>
+#include <control.h>
+#include <lineedit.h>
+// #include <mjuke.h>
 
 
 /*  Donnees de main.1  */
@@ -79,12 +81,27 @@ extern QDIconRecord camembertIcon;
 /* Donnees de sons.1 */
 extern DataBlock yeah;
 
-int OuBase()
+pascal int filterBase(long Dir)
+{
+        if ((*(word*)(Dir+0x10)==0xF5) && (*(word*)(Dir+0x1f)==0x6367))
+                return (displaySelect);
+        else
+                return (noDisplay);
+}
+
+pascal int filterOuvrir(long Dir)
+{
+        if ((*(word*)(Dir+0x10)==0xF6) && (*(word*)(Dir+0x1f)==0x6367))
+                return (displaySelect);
+        else
+                return (noDisplay);
+}
+
+int OuBase(void)
 {
     SFReplyRec      Base;
-    int             filterBase();
 
-    SFGetFile(30,45,"\pO\235 se trouve la base de questions ?",filterBase, NIL,&Base);
+    SFGetFile(30, 45, "\pO\235 se trouve la base de questions ?", (WordProcPtr)filterBase, NIL, &Base);
     if (Base.good) {
         p2cstr(Base.fullPathname);
         initBase(Base.fullPathname, &InfoRec);
@@ -93,24 +110,14 @@ int OuBase()
         return 1;
 }
 
-pascal int filterBase(Dir)
-long  Dir;
-{
-        if ((*(word*)(Dir+0x10)==0xF5) && (*(word*)(Dir+0x1f)==0x6367))
-                return (displaySelect);
-        else
-                return (noDisplay);
-}
-
-void DoOuvrir()
+void DoOuvrir(void)
 {
     SFReplyRec choix;
-    int filterOuvrir();
 
     if (jeu.action)
         Fermer();
     if (!jeu.action) {
-         SFGetFile(30, 45, "\pOuvrir le jeu :", filterOuvrir, NIL, &choix);
+         SFGetFile(30, 45, "\pOuvrir le jeu :", (WordProcPtr)filterOuvrir, NIL, &choix);
          if (choix.good) {
              p2cstr(choix.filename);
              p2cstr(choix.fullPathname);
@@ -127,16 +134,7 @@ void DoOuvrir()
     }
 }
 
-pascal int filterOuvrir(Dir)
-long  Dir;
-{
-        if ((*(word*)(Dir+0x10)==0xF6) && (*(word*)(Dir+0x1f)==0x6367))
-                return (displaySelect);
-        else
-                return (noDisplay);
-}
-
-void DoSauver()
+void DoSauver(void)
 {
     if (jeu.nouveau)
         DoSauverSous();
@@ -144,7 +142,7 @@ void DoSauver()
         Enregistrer();
 }
 
-void DoSauverSous()
+void DoSauverSous(void)
 {
     SFReplyRec choix;
 
@@ -160,7 +158,7 @@ void DoSauverSous()
     }
 }
 
-void DoInstr()
+void DoInstr(void)
 {
    GrafPortPtr  CurPort,dlgInstr;
    word         itemHit;
@@ -221,7 +219,7 @@ void DoInstr()
 
         InstrPage(page);
 
-        InstallFont(8*256+0, shaston, 0);
+        InstallFont((FontID){ shaston, 0, 8 }, 0);
         itemHit = ModalDialog(NIL);
         if (itemHit==3) page++;
         if (itemHit==4) page--;
@@ -231,8 +229,7 @@ void DoInstr()
    CloseDialog(dlgInstr);
 }
 
-Word PageLen(pg)
-char *pg;
+Word PageLen(char *pg)
 {
         Word i;
 
@@ -240,8 +237,7 @@ char *pg;
         return i;
 }
 
-void InstrPage(npage)
-int npage;
+void InstrPage(int npage)
 {
         static char  numPageStr[2];
         Rect  r;
@@ -329,7 +325,7 @@ il est d\216clar\216 vainqueur.\33"
 
         SetRect(&r,5,10,295,155);
 
-        InstallFont(10*256+0, geneva, 0);
+        InstallFont((FontID){ geneva, 0, 10 }, 0);
         sprintf(numPageStr, "%d", npage+1);
 
         LETextBox2(PageStr[npage], PageLen(PageStr[npage]), &r, 0);
@@ -337,7 +333,7 @@ il est d\216clar\216 vainqueur.\33"
         DrawCString(numPageStr);
 }
 
-void DoAbout()
+void DoAbout(void)
 {
 
     GrafPortPtr oldPort, dlgAbout, dlgInfo;
@@ -381,7 +377,7 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
          TRUE, 0L,
          { &bOkInfo, 0L } };
 
-    MJPlay(1);
+    // MJPlay(1);
 
     SetRect(&rInfo,5, 5,295,160);
 
@@ -389,15 +385,15 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
     SetPort(dlgAbout = GetNewModalDialog(&tmpAbout));
 
     SetForeColor(0);
-    InstallFont(14*256, venice, 0);
+    InstallFont((FontID){ venice, 0, 14 }, 0);
     MoveTo(60, 25);
     DrawCString("Trivial Pursuit GS");
-    InstallFont(8*256+0, shaston, 0);
+    InstallFont((FontID){ shaston, 0, 8 }, 0);
     MoveTo(25, 75);
     DrawCString("par Zubrowka et 42-Crew");
     MoveTo(20, 90);
     DrawCString("Version 1.01 - 15/12/1990");
-    DrawIcon(&camembertIcon, 0, 10, 10);
+    DrawIcon((Pointer)&camembertIcon, 0, 10, 10);
     ItemHit = ModalDialog(0L);
     CloseDialog(dlgAbout);
 
@@ -407,11 +403,11 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
         ItemHit = ModalDialog(0L);
         CloseDialog(dlgInfo);
     }
-    MJStop();
+    // MJStop();
     SetPort(oldPort);
 }
 
-void DoNoms()
+void DoNoms(void)
 {
     static char nomStr[6][16];
     static ItemTemplate OK = {
@@ -534,7 +530,7 @@ void DoNoms()
     jeu.action = TRUE;
 }
 
-void DoScores()
+void DoScores(void)
 {
     GrafPortPtr scoresDlg, oldPort;
     char buf[6];
@@ -642,7 +638,7 @@ void DoScores()
     SetPort(oldPort);
 }
 
-void DoInfos()
+void DoInfos(void)
 {
     GrafPortPtr infosDlg, oldPort;
     Word i;
@@ -669,22 +665,22 @@ void DoInfos()
     SetPort(oldPort);
 }
 
-void Dialogue6Camemberts()
+void Dialogue6Camemberts(void)
 {
-    AlertWindow(0, NULL, "90/\1J\1\0\r\r\1S\11\0Pas mal, pas mal...\r\r\
+    AlertWindow(0, NULL, (Ref)"90/\1J\1\0\r\r\1S\11\0Pas mal, pas mal...\r\r\
 \1S\0\0Rendez-vous \210 la case centrale !/^#6");
 }
 
-void DialogueFinal()
+void DialogueFinal(void)
 {
-    AlertWindow(0, NULL, "90/\1J\1\0\r\r\1S\11\0F\216licitations !\r\r\r\
+    AlertWindow(0, NULL, (Ref)"90/\1J\1\0\r\r\1S\11\0F\216licitations !\r\r\r\
 \1S\0\0Saurez-vous maintenant r\216pondre correctement \210 cette \
 (ultime ?) question ?/^#6");
 }
 
-void DialogueBravo()
+void DialogueBravo(void)
 {
-    AlertWindow(0, NULL, "90/\1J\1\0\1S\11\0\1C\6\0Bravo !\r\r\
+    AlertWindow(0, NULL, (Ref)"90/\1J\1\0\1S\11\0\1C\6\0Bravo !\r\r\
 \1S\0\0\1C\0\0Vous avez gagn\216 !!! Vous connaissez certainement les \
 questions par c\317ur; aussi, n'attendez plus pour nous contacter afin de \
 nous aider \210 taper les prochaines bases de questions Trivial Pursuit, \
@@ -692,12 +688,11 @@ et ainsi prendre part \210 cette \216pop\216e des temps modernes !\
 \r\r3614 RTEL1 ou RTEL2 Bal Zubrowka/^#0");
 }
 
-void AfficheTheme(theme)
-Word theme;
+void AfficheTheme(Word theme)
 {
 }
 
-Word ChoixTheme()
+Word ChoixTheme(void)
 {
     static StringHandle themeLibel[6] = {
         &themeBut1,
@@ -714,7 +709,7 @@ Word ChoixTheme()
         if (!(*themeLibel[i] = (StringPtr)malloc(sizeof(Str255))))
             SysErr();
         strcpy((*themeLibel[i])->text, InfoRec.theme[i]);
-        (*themeLibel[i])->length = strlen((*themeLibel[i])->text);
+        (*themeLibel[i])->textLength = strlen((*themeLibel[i])->text);
     }
     themeDlg = GetNewModalDialog(&themeTemp);
     t = ModalDialog(0l);
@@ -724,8 +719,7 @@ Word ChoixTheme()
     return t - 2;
 }
 
-Boolean DoQuestRep(theme)
-Word theme;
+Boolean DoQuestRep(Word theme)
 {
     GrafPortPtr dlgQR, oldPort;
     int ItemHit1, ItemHit2, pas, rc, rech;
@@ -822,21 +816,21 @@ Word theme;
          oldPort = GetPort();
          SetPort(dlgQR);
          MoveTo(10, 10);
-         InstallFont(8*256+boldMask, shaston, 0);
+         InstallFont((FontID){ shaston, 0, 8 }, 0);
          SetForeColor(Question.qSujet);
          DrawCString(InfoRec.theme[Question.qSujet - 1]);
          SetForeColor(0);
 
 /* Pour la version de test, a supprimer par la suite*/
-         InstallFont(9*256+0, times, 0);
+         InstallFont((FontID){ times, 0, 9 }, 0);
          sprintf(CarteID, "%u", Question.qCarte);
          MoveTo(270, 10);
          DrawCString(CarteID);
 /*   Fin du bloc a supprimer */
 
-         InstallFont(12*256+0, geneva, 0);
+         InstallFont((FontID){ geneva, 0, 12 }, 0);
          pas = Ecrit(Question.qQuestion, 30);
-         InstallFont(8*256+0, shaston, 0);
+         InstallFont((FontID){ shaston, 0, 8 }, 0);
 /* Attente Reponse */
          do
              if ((ItemHit1 = ModalDialog(0L)) == 1) {
@@ -877,9 +871,9 @@ Word theme;
               ShowDItem(dlgQR, 4);
               SelectIText(dlgQR, 5, 0, jReponse[0]);
          }
-         InstallFont(12*256+0, geneva, 0);
+         InstallFont((FontID){ geneva, 0, 12 }, 0);
          Ecrit(Question.qReponse, pas + 10);
-         InstallFont(8*256+0, shaston, 0);
+         InstallFont((FontID){ shaston, 0, 8 }, 0);
          ItemHit2 = ModalDialog(0L);
          CloseDialog(dlgQR);
          SetPort(oldPort);
@@ -889,7 +883,7 @@ Word theme;
         switch (rc) {
             case -2 :
             case -3 : AlertWindow(0, NULL,
-"33/\
+(Ref)"33/\
 Questions \216puis\216es; la base va \220tre r\216initialis\216e./\
 ^#6\0");
                       reInitBase();
@@ -898,9 +892,7 @@ Questions \216puis\216es; la base va \220tre r\216initialis\216e./\
         }
 }
 
-Word Compare(qRep, jRep)
-char *qRep;
-char *jRep;
+Word Compare(char *qRep, char *jRep)
 {
      int i=0;
      char cqRep[255];
@@ -920,8 +912,7 @@ char *jRep;
      return 0;
 }
 
-void Majuscule(dest, chaine)
-char *dest, *chaine;
+void Majuscule(char *dest, char *chaine)
 {
         do {
                 switch (*chaine) {
@@ -963,9 +954,7 @@ char *dest, *chaine;
         } while (*chaine++);
 }
 
-char *strnstr(src, sub, n)
-char *src, *sub;
-Word n;
+char *strnstr(char *src, char *sub, Word n)
 {
      char *p1, *p2;
      Word i;
@@ -986,7 +975,7 @@ Word n;
      return NULL;
 }
 
-void DoEdition()
+void DoEdition(void)
 {
         /*
         int Init_Get;
@@ -995,19 +984,17 @@ void DoEdition()
         AlertWindow(0, NULL, "90/\1J\1\0\r\r\1S\11\0Probl\220me...\r\r\
 \1S\0\0La nouvelle base n'est pas charg/216e./^#6");
         */
-        AlertWindow(0, NULL, "90/\
-\1J\1\0\Si vous d\216sirez participer \210 \15\
+        AlertWindow(0, NULL, (Ref)"90/\
+\1J\1\0Si vous d\216sirez participer \210 \15\
 l'\216laboration de la prochaine Base \15\
-\de Questions de \15\
+de Questions de \15\
 \1F\5\0\000\014Trivial Pursuit GS\15\1F\0\0\0\0 \r \
 Faites vous conna\224tre !!! \15\
 Minitel : 3614 RTEL1 ou RTEL2 \15\
 Bal Zubrowka/^#6\0");
 }
 
-int Ecrit(p, v)
-char *p;
-int v;
+int Ecrit(char *p, int v)
 {
     int i, npix;
     Boolean lf = FALSE, italique = FALSE, guillemet = FALSE;
@@ -1040,10 +1027,10 @@ int v;
     return v+15;
 }
 
-void Fermer()
+void Fermer(void)
 {
     switch (AlertWindow(0, NULL,
-        "32/Voulez-vous sauver la partie avant de fermer ?/^#2/#3/#1")) {
+        (Ref)"32/Voulez-vous sauver la partie avant de fermer ?/^#2/#3/#1")) {
         case 0 : DoSauver();
         case 1 : jeu.action = FALSE;
     }

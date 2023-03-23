@@ -12,6 +12,7 @@
 /*  Headers C standards  */
 
 #include <string.h>
+#include <stdlib.h>
 
 
 /*  Headers Toolbox  */
@@ -28,7 +29,7 @@
 #include <desk.h>
 #include <sound.h>
 #include <gsos.h>
-#include <mjuke.h>
+// #include <mjuke.h>
 
 /*  Donnees de ticons.1  */
 
@@ -115,15 +116,15 @@ main()
 
     old_border = *border;
     *border = 0x04;
-    onexit(ByeBye);
+    atexit(ByeBye);
     if (rc = InitTools(mode320))
         exit(rc);
     srand((word)TickCount());   /* init du generateur pseudo-aleatoire */
     PlaceMenus(5);
     DecompacteFond();
-    SetColorTable(0, &(**imageHdl).tableCoul[0]);
-    Desktop(SetDeskPat, DessineFond);
-    MJMount("\p9/ABOUT.MJK", 1);
+    SetColorTable(0, (**imageHdl).tableCoul[0]);
+    Desktop(SetDeskPat, (Long)DessineFond);
+    // MJMount("\p9/ABOUT.MJK", 1);
     InitFont();
     Init_Defaut = initBase("9:bases:genus", &InfoRec);
     if (Init_Defaut)
@@ -170,11 +171,11 @@ void ByeBye()
 
 void InitFont()
 {
-    InstallFont(10*256+0, geneva,0);
-    InstallFont(12*256+0, geneva,0);
-    InstallFont(14*256+0, venice,0);
-    InstallFont( 9*256+0, times,0);
-    InstallFont( 8*256+0, shaston,0);
+    InstallFont((FontID){ geneva, 0, 10 }, 0);
+    InstallFont((FontID){ geneva, 0, 12 }, 0);
+    InstallFont((FontID){ venice, 0, 14 }, 0);
+    InstallFont((FontID){ times, 0, 9 }, 0);
+    InstallFont((FontID){ shaston, 0, 8 }, 0);
 }
 
 void ActivationFen()
@@ -313,10 +314,10 @@ void DecompacteFond()
     imageHdl = (struct ecran **)NewHandle(0x8000L, MyID, 0x0010, 0L);
     if (_toolErr)
         SysErr();
-    HLock(imageHdl);
+    HLock((Handle)imageHdl);
     AdrImage = *imageHdl;
-    UnPackBytes(fondEcran.data, fondEcran.length, &AdrImage, &size);
-    HUnlock(imageHdl);
+    UnPackBytes(fondEcran.data, fondEcran.length, (Handle)&AdrImage, &size);
+    HUnlock((Handle)imageHdl);
 }
 
 void ColorCycle()
@@ -325,12 +326,12 @@ void ColorCycle()
     LongWord dt;
 
     for (i = 0; i < 12; i++) {
-        a = (**imageHdl).tableCoul[0].entries[1];
+        a = (**imageHdl).tableCoul[0][1];
         for (j = 1; j <= 6; j++)
-            (**imageHdl).tableCoul[0].entries[j] =
-                                        (**imageHdl).tableCoul[0].entries[j+1];
-        (**imageHdl).tableCoul[0].entries[6] = a;
-        SetColorTable(0, &(**imageHdl).tableCoul[0]);
+            (**imageHdl).tableCoul[0][j] =
+                                        (**imageHdl).tableCoul[0][j+1];
+        (**imageHdl).tableCoul[0][6] = a;
+        SetColorTable(0, (**imageHdl).tableCoul[0]);
         dt = TickCount() + 6L;
         while (TickCount() < dt);  /* delai 1/10 s */
     }
@@ -350,5 +351,5 @@ Word vitesse, generateur;
         sonParms.volSetting = 250;
         sonParms.nextWavePtr = 0;
         FFStopSound(0x0001 << generateur);
-        FFStartSound(0x0001 | generateur << 8 | generateur << 12, &sonParms);
+        FFStartSound(0x0001 | generateur << 8 | generateur << 12, (Pointer)&sonParms);
 }

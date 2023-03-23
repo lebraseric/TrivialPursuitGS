@@ -11,7 +11,7 @@
 /*  Headers C standards  */
 
 #include <errno.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -216,8 +216,8 @@ void Ouvrir()
         Read(&IODCB);
     } else {
         sprintf(verStr, "%.1d.%.1d", version / 256, version & 0x00ff);
-        AlertWindow(0, &toVerStr,
-                "33/Jeu sauvegard\216 avec Trivial Pursuit version *0./^#6");
+        AlertWindow(0, (Pointer)&toVerStr,
+                (Ref)"33/Jeu sauvegard\216 avec Trivial Pursuit version *0./^#6");
     }
     Close(&closeDCB);
 }

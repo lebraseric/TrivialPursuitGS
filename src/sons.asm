@@ -2,24 +2,24 @@
 
 clap           data  gs
                dc    i2'fclap-dclap'
-dclap          copy  3/src/clap.1
+dclap          copy  src/clap.asm
 fclap          anop
                end
 
 dice           data  gs
                dc    i2'fdice-ddice'
-ddice          copy  3/src/dice.1
+ddice          copy  src/dice.asm
 fdice          anop
                end
 
 decu           data  gs
                dc    i2'fdecu-ddecu'
-ddecu          copy  3/src/decu.1
+ddecu          copy  src/decu.asm
 fdecu          anop
                end
 
 yeah           data  gs
                dc    i2'fyeah-dyeah'
-dyeah          copy  3/src/yeah.1
+dyeah          copy  src/yeah.asm
 fyeah          anop
                end

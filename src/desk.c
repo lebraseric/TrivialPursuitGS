@@ -302,7 +302,12 @@ pascal void DessineFond()
     Rect r;
     LocInfo source;
 
-    dbr = SaveDB();
+    // Preserve data bank (see note in Toolbox Reference vol.2 p.25-43)
+    asm {
+        phb
+        phk
+        plb
+    }
     HLock(imageHdl);
     source.portSCB = 0;
     source.ptrToPixImage = *imageHdl;
@@ -311,12 +316,15 @@ pascal void DessineFond()
     SetRect(&r, 0, 0, 320, 187);
     PPToPort(&source, &r, 0, 13, modeCopy);
     HUnlock(imageHdl);
-    DrawIcon(face[pJeu.tour], 0,
+    DrawIcon((Pointer)face[pJeu.tour], 0,
         cases[pJeu.joueur[pJeu.tour].position].x - face[pJeu.tour]->iconWidth / 2,
         cases[pJeu.joueur[pJeu.tour].position].y - face[pJeu.tour]->iconHeight / 2);
     if (pJeu.etape == CHOISIR_CASE)
         for (i = 0; i < pJeu.ndest; i++)
-            DrawIcon(pion[cases[pJeu.dest[i]].type & 0x0f], 0,
+            DrawIcon((Pointer)pion[cases[pJeu.dest[i]].type & 0x0f], 0,
                             cases[pJeu.dest[i]].x-10, cases[pJeu.dest[i]].y-8);
-    RestoreDB(dbr);
+    // Restore data bank
+    asm {
+        plb
+    }
 }

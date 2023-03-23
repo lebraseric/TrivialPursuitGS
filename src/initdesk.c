@@ -7,15 +7,17 @@
 /* ************************************************************************* */
 
 
+#include <stdlib.h>
 #include <LOCATOR.H>
 #include <MEMORY.H>
 #include <INTMATH.H>
 #include <SOUND.H>
-#include <MJUKE.H>
+// #include <MJUKE.H>
 
 #define private static
 
-Word MyID, MJStart=0;
+Word MyID;
+// Word MJStart=0;
 Word InitTools();
 void SysErr();
 
@@ -45,7 +47,7 @@ Word mode;
                    Word Length;
                    Word Table [19*2];
                  }
-   ToolTable =
+   toolTable =
                  {
                    0,
                    0x4000,         /* Mode d'initialisation de QuickDraw */
@@ -73,26 +75,29 @@ Word mode;
    char *z;
    char **pgzero;
 
-   ToolTable.InitMode = mode;
+   toolTable.InitMode = mode;
    TLStartUp();
    ErrorCheck(1);
    if (TLVersion() >= 0x0300) {
        MyID = MMStartUp();
        ErrorCheck(2);
-       LoadOneTool(69, 101);
-       if (!_toolErr) {
-              MJStart=1;
-              MJStartUp(MyID, 0);
-       }
-       else {
-              pgzero = NewHandle(256L,MyID,0xC00C,0L);
-              z = *pgzero;
-              SoundStartUp((int) z);
-              TLTextMountVolume(NullStr, "\pTool 069 introuvable", "\pContinuer", "\p");
-       }
-       ToolRecRef = StartUpTools(MyID,0,&ToolTable);
+    //    LoadOneTool(69, 101);
+    //    if (!_toolErr) {
+    //           MJStart=1;
+    //           MJStartUp(MyID, 0);
+    //    }
+    //    else {
+    //           pgzero = NewHandle(256L,MyID,0xC00C,0L);
+    //           z = *pgzero;
+    //           SoundStartUp((int) z);
+    //           TLTextMountVolume(NullStr, "\pTool 069 introuvable", "\pContinuer", "\p");
+    //    }
+       pgzero = NewHandle(256L,MyID,0xC00C,0L);
+       z = *pgzero;
+       SoundStartUp((int) z);
+       ToolRecRef = StartUpTools(MyID, 0, (Ref)&toolTable);
        ErrorCheck(3);
-       onexit(CloseTools);
+       atexit(CloseTools);
        return 0;
    }
    else {
@@ -118,9 +123,9 @@ private void CloseTools()
 {
    ShutDownTools(0, ToolRecRef);
 
-   if (MJStart)
-        MJShutDown();
-   else
+//    if (MJStart)
+//         MJShutDown();
+//    else
         SoundShutDown();
 
    MMShutDown(MyID);

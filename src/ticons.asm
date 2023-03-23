@@ -1091,7 +1091,7 @@ Cliquer         entry
 fondEcran      data  gs
 
                dc    i2'fin-debut'
-debut          copy  3:src:fond.pak.1
+debut          copy  src/fond.pak.asm
 fin            anop
 
                end

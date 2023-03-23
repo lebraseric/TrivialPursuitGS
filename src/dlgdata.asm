@@ -4,7 +4,7 @@
 *                                                               *
 *****************************************************************
 
-           mcopy     3:src:dlgdata.mac
+           mcopy     macros:dlgdata.mac
            copy      2:ainclude:e16.control
            objcase   on
 

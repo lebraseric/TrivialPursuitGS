@@ -78,19 +78,19 @@ void InitJoueursDialog()
 
     SetPort(joueursDialog = NewModelessDialog(&jFenBoundsRect,
                                               NULL,
-                                              0xffffffff,
+                                              (GrafPortPtr)0xffffffff,
                                               fQContent + fCtlTie,
                                               0L,
                                               NULL));
     SetFrameColor(&jFenColors, joueursDialog);
     SetSolidBackPat(14);
-    InstallFont(10*256+0, geneva, 0);
-    NewDItem(joueursDialog, DE, &deRect, userItem, DessineDe, 0, 0, NULL);
-    NewDItem(joueursDialog, PARTS, &partsRect, userItem, DessineParts, 0, 0, NULL);
+    InstallFont((FontID){ geneva, 0, 10 }, 0);
+    NewDItem(joueursDialog, DE, &deRect, userItem, (Pointer)DessineDe, 0, 0, NULL);
+    NewDItem(joueursDialog, PARTS, &partsRect, userItem, (Pointer)DessineParts, 0, 0, NULL);
     for (i = 5; i >= 0; i--) {
         SetRect(&r, 2, 2+i*25, 0, 0);
         NewDItem(joueursDialog, i+1, &r, checkItem,
-                                    pJeu.joueur[i].nom, FALSE, 0, &jCaseColors);
+                 pJeu.joueur[i].nom, FALSE, 0, (Pointer)&jCaseColors);
     }
     SetContentDraw(ContenuJFen, joueursDialog);
     ShowWindow(joueursDialog);
@@ -187,7 +187,7 @@ Word item;
     for (i = 0; i < 6; i++)
         for (j = 0; j < 6;)
             if (pJeu.joueur[i].camemberts & 1 << j++)
-                DrawIcon(&partIcon, 0xe000 + j*256, j*10 + 10, i*25 + 17);
+                DrawIcon((Pointer)&partIcon, 0xe000 + j*256, j*10 + 10, i*25 + 17);
 }
 
 pascal void DessineDe(dialog, item)
@@ -198,13 +198,13 @@ Word item;
     Rect r;
     Point oldPenSize;
 
-    DrawIcon(Des[pJeu.de], 0, deRect.h1, deRect.v1);
+    DrawIcon((Pointer)Des[pJeu.de], 0, deRect.h1, deRect.v1);
     GetPenSize(&oldPenSize);
     SetPenSize(3, 3);
     SetSolidPenPat(pJeu.de == 6 ? 2 : 14);
     SetRect(&r, 29, 149, 67, 180);
     FrameRRect(&r, 16, 16);
-    SetPenSize(oldPenSize);
+    SetPenSize(oldPenSize.h, oldPenSize.v);
 }
 
 void JoueurSuivant()

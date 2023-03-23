@@ -2,10 +2,10 @@
  *  trivial.h -- Header de l'application
  */
 
-#ifndef __types__ 
-#include <TYPES.H> 
-#endif 
+#ifndef TRIVIAL_H
+#define TRIVIAL_H
 
+#include <types.h> 
 
 /*  Macros  */
 
@@ -119,3 +119,5 @@ char litc();
 char nextc();
 void Ouvrir();
 void Enregistrer();
+
+#endif /* TRIVIAL_H */
