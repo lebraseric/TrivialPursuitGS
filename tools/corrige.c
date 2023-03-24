@@ -19,6 +19,7 @@ Auteur : Eric LE BRAS
 
 Versions :
 0.1    03/01/90    Tri des questions
+0.2    24/03/23    Remplacement onexit() par atexit()
 
 ****************************************************************/
 
@@ -68,7 +69,7 @@ char *argv[];
                         error("corrige: impossible d'ouvrir %s", argv[2]);
                    else {
                         corrige(argv[1], lot);
-                        onexit(fermelot);
+                        atexit(fermelot);
                    }
          else /* parametre d'action incorrect */
               erreur = TRUE;

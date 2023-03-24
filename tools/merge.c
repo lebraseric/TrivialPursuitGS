@@ -23,7 +23,7 @@ Date : 10 Octobre 1989
 #include <ERRNO.H>
 #include <STRING.H>
 #include <TYPES.H>
-#include "GLOBAL.H"
+#include "typedefs.h"
 
 #define LBUFF 1024
 
