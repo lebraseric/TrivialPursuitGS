@@ -7,6 +7,8 @@
 /* ************************************************************************* */
 
 
+#include "initdesk.h"
+
 #include <stdlib.h>
 #include <LOCATOR.H>
 #include <MEMORY.H>
@@ -14,20 +16,16 @@
 #include <SOUND.H>
 // #include <MJUKE.H>
 
-#define private static
 
 Word MyID;
 // Word MJStart=0;
-Word InitTools();
-void SysErr();
 
-extern int _toolErr;
+static Ref ToolRecRef;
+static Pointer Video = (Pointer)0xc029;
+static char NullStr[] = "\p";
 
-private Ref ToolRecRef;
-private Pointer Video = (Pointer)0xc029;
-private char NullStr[] = "\p";
-private void CloseTools();
-private void ErrorCheck();
+static void CloseTools(void);
+static void ErrorCheck(int);
 
 
 /* ************************************************************************* */
@@ -36,8 +34,7 @@ private void ErrorCheck();
 /*                                                                           */
 /* ************************************************************************* */
 
-Word InitTools(mode)
-Word mode;
+Word InitTools(Word mode)
 {
    static struct {
                    Word Flag;
@@ -119,7 +116,7 @@ Word mode;
 /*                                                                           */
 /* ************************************************************************* */
 
-private void CloseTools()
+static void CloseTools(void)
 {
    ShutDownTools(0, ToolRecRef);
 
@@ -139,8 +136,7 @@ private void CloseTools()
 /*                                                                           */
 /* ************************************************************************* */
 
-private void ErrorCheck(where)
-int where;
+static void ErrorCheck(int where)
 {
    static char Texte[] = "\pErreur fatale $0000 en 0000";
    if (_toolErr) {
@@ -163,7 +159,7 @@ int where;
 /*                                                                           */
 /* ************************************************************************* */
 
-void SysErr()
+void SysErr(void)
 {
     static char texte[] = "\pErreur systeme $0000";
     if (_toolErr) {

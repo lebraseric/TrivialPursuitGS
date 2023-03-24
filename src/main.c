@@ -7,7 +7,11 @@
 
 #include "trivial.h"
 #include "initdesk.h"
-
+#include "typedefs.h"
+#include "desk.h"
+#include "sounds.h"
+#include "os.h"
+#include "dialogs.h"
 
 /*  Headers C standards  */
 
@@ -27,18 +31,21 @@
 #include <menu.h>
 #include <dialog.h>
 #include <desk.h>
-#include <sound.h>
 #include <gsos.h>
 // #include <mjuke.h>
 
-/*  Donnees de ticons.1  */
 
-extern DataBlock fondEcran;
+char titreActif[]="\pSon actif";
+char titreInactif[]="\pSon inactif";
+Boolean sonActif= TRUE;
+WmTaskRec tache;
+tInfoRec InfoRec;
+Jeu jeu;
+PJeu pJeu = { 3, 6, 0, 0 };
+Ecran **imageHdl;
 
 
-/*  Variables statiques  */
-
-char *Menus[] = {
+static char *Menus[] = {
 ">> Questions \\N5\r\
 --Facile \\N270*11\r\
 --Moyen \\N271*22\r\
@@ -67,48 +74,22 @@ char *Menus[] = {
 --Instructions... \\VN262*??\r"
 };
 
-char titreActif[]="\pSon actif";
-char titreInactif[]="\pSon inactif";
 
-Boolean nonFini = TRUE, sonActif= TRUE;
-WmTaskRec tache;
-tInfoRec InfoRec;
-Pointer border = (Pointer)0x00e1c034;
-int old_border;
+static Boolean nonFini = TRUE;
+static Pointer border = (Pointer)0x00e1c034;
+static int old_border;
 
-struct {
-    GSString255 chemin;
-    char nom[15];
-    Boolean nouveau, action;
-} jeu;
 
-struct {
-    Word diff;
-    Word de;
-    Word tour;
-    Word etape;
-    Boolean gagnee;
-    Byte dest[MAXDEST];
-    int ndest;
-    struct {
-        char nom[LNOM];
-        Word camemberts;
-        Byte position;
-        Boolean enJeu;
-        struct {
-            Word essai;
-            Word succes;
-        } total[6];
-    } joueur[6];
-} pJeu = { 3, 6, 0, 0 };
-
-struct ecran {
-    Byte pixelMap[32000];
-    AnSCBByte SCBByte[200];
-    Byte filler[56];
-    ColorTable tableCoul[16];
-} **imageHdl;
-
+static void ByeBye(void);
+static void InitFont(void);
+static void ActivationFen(void);
+static void ExecMenu(int art);
+static void DoQuitter(void);
+static void DoNouveau(void);
+static void DoSetDiff(int article);
+static void PlaceMenus(int NbreMenus);
+static void DecompacteFond(void);
+static void ColorCycle(void);
 
 main()
 {
@@ -163,13 +144,13 @@ main()
     }
 }
 
-void ByeBye()
+void ByeBye(void)
 {
     fermeBase();
     *border = old_border;
 }
 
-void InitFont()
+void InitFont(void)
 {
     InstallFont((FontID){ geneva, 0, 10 }, 0);
     InstallFont((FontID){ geneva, 0, 12 }, 0);
@@ -178,7 +159,7 @@ void InitFont()
     InstallFont((FontID){ shaston, 0, 8 }, 0);
 }
 
-void ActivationFen()
+void ActivationFen(void)
 {
     if (tache.modifiers & activeFlag)
         SetMenuFlag(disableMenu, 3);
@@ -187,8 +168,7 @@ void ActivationFen()
     DrawMenuBar();
 }
 
-void ExecMenu(art)
-int art;
+void ExecMenu(int art)
 {
     switch (art) {
         case 256 : DoAbout(); break;
@@ -211,7 +191,7 @@ int art;
     HiliteMenu(FALSE, (int)(tache.wmTaskData >> 16));
 }
 
-void DoQuitter()
+void DoQuitter(void)
 {
     if (jeu.action)
         Fermer();
@@ -219,7 +199,7 @@ void DoQuitter()
         nonFini = FALSE;
 }
 
-void DoNouveau()
+void DoNouveau(void)
 {
     Word i;
 
@@ -245,8 +225,7 @@ void DoNouveau()
     }
 }
 
-void DoSetDiff(article)
-int article;
+void DoSetDiff(int article)
 {
     switch (article) {
         case 270 : pJeu.diff = 1; break;
@@ -257,46 +236,7 @@ int article;
     Coche();
 }
 
-void Coche()
-{
-    static int coche = 272;
-    int a;
-
-    switch (pJeu.diff) {
-        case 1 : a = 270; break;
-        case 2 : a = 271; break;
-        case 3 : a = 272; break;
-        case 4 : a = 277; break;
-    }
-    CheckMItem(FALSE, coche);
-    CheckMItem(TRUE, coche = a);
-}
-
-void DoActiveSon()
-{
-         if (sonActif) {
-                sonActif=FALSE;
-                SetMItemName(titreInactif, 278);
-         }
-         else {
-                sonActif=TRUE;
-                SetMItemName(titreActif, 278);
-        }
-
-        /*
-        if (sonActif) {
-                sonActif=FALSE;
-                CheckMItem(FALSE, 278);
-        }
-        else {
-                sonActif=TRUE;
-                CheckMItem(TRUE, 278);
-        }
-        */
-}
-
-void PlaceMenus(NbreMenus)
-int NbreMenus;
+void PlaceMenus(int NbreMenus)
 {
     int i;
     for (i = 0; i < NbreMenus; i++)
@@ -306,12 +246,12 @@ int NbreMenus;
     DrawMenuBar();
 }
 
-void DecompacteFond()
+void DecompacteFond(void)
 {
     Word size = 0x8000;
-    struct ecran *AdrImage;
+    Ecran *AdrImage;
 
-    imageHdl = (struct ecran **)NewHandle(0x8000L, MyID, 0x0010, 0L);
+    imageHdl = (Ecran **)NewHandle(0x8000L, MyID, 0x0010, 0L);
     if (_toolErr)
         SysErr();
     HLock((Handle)imageHdl);
@@ -320,7 +260,7 @@ void DecompacteFond()
     HUnlock((Handle)imageHdl);
 }
 
-void ColorCycle()
+void ColorCycle(void)
 {
     Word i, j, a;
     LongWord dt;
@@ -335,21 +275,4 @@ void ColorCycle()
         dt = TickCount() + 6L;
         while (TickCount() < dt);  /* delai 1/10 s */
     }
-}
-
-void JoueSon(son, vitesse, generateur)
-DataBlock *son;
-Word vitesse, generateur;
-{
-        static SoundParamBlock sonParms;
-
-        sonParms.waveStart = son->data;
-        sonParms.waveSize = son->length/256;
-        sonParms.freqOffset = vitesse;
-        sonParms.docBuffer = 0;
-        sonParms.bufferSize = 0;
-        sonParms.volSetting = 250;
-        sonParms.nextWavePtr = 0;
-        FFStopSound(0x0001 << generateur);
-        FFStartSound(0x0001 | generateur << 8 | generateur << 12, (Pointer)&sonParms);
 }

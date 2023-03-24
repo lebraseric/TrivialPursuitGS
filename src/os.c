@@ -18,60 +18,35 @@
 
 /*  Headers Toolbox  */
 
-#include <types.h>
+#include "os.h"
+
 #include <window.h>
 #include <gsos.h>
-
-
-/*  Donnees de main.1  */
-
-extern struct {
-    GSString255 chemin;
-    char nom[15];
-    Boolean nouveau, action;
-} jeu;
-extern struct {
-    Word diff;
-    Word de;
-    Word tour;
-    Word etape;
-    Boolean gagnee;
-    Byte dest[MAXDEST];
-    int ndest;
-    struct {
-        char nom[LNOM];
-        Word camemberts;
-        Byte position;
-        Boolean enJeu;
-        struct {
-            Word essai;
-            Word succes;
-        } total[6];
-    } joueur[6];
-} pJeu;
+#include <stdio.h>
+#include <types.h>
 
 
 /*  Variables statiques  */
 
-#define private static
-
-private FILE *fbase;
-private char *p;
-private word t, n, nmax;
-private Boolean baseOuverte = FALSE;
-private struct _index {
+static FILE *fbase;
+static char *p;
+static word t, n, nmax;
+static Boolean baseOuverte = FALSE;
+static struct _index {
    char typeQuest;
    word carte;
    long adrQuest;
 } *index;
-OpenRec openDCB = { 15, 0, &jeu.chemin };
-IORec IODCB = { 5 };
-RefNumRec closeDCB = { 1 };
+static OpenRec openDCB = { 15, 0, &jeu.chemin };
+static IORec IODCB = { 5 };
+static RefNumRec closeDCB = { 1 };
 
+static int decode(tQuestion *, long, FILE *);
+static void litchamps(register char *);
+static char litc(void);
+static char nextc(void);
 
-int initBase(cheminBase, infoRec)
-char *cheminBase;
-tInfoRec *infoRec;
+int initBase(char *cheminBase, tInfoRec *infoRec)
 {
    word l;
 
@@ -87,15 +62,14 @@ tInfoRec *infoRec;
    return 0;
 }
 
-void reInitBase()
+void reInitBase(void)
 {
    word i;
 
    for (i=0; i<nmax; index[i++].typeQuest &= 0x7f);
 }
 
-int nouvQuest(question)
-tQuestion *question;
+int nouvQuest(tQuestion *question)
 {
    word i, j, d, rc;
 
@@ -127,79 +101,7 @@ tQuestion *question;
    return rc;
 }
 
-int fermeBase()
-{
-    if (baseOuverte) {
-        fclose(fbase);
-        free(index);
-        baseOuverte = FALSE;
-        return 0;
-    }
-}
-
-int decode(question, loc, fic)
-tQuestion *question;
-long loc;
-FILE *fic;
-{
-   word l;
-   char buffer[256];
-
-   fseek(fic, loc, 0);
-   if (!fread((char *)&l, sizeof(l), 1, fic)) return errno;
-   if (!fread(buffer, 1, l, fic)) return errno;
-   p = buffer; t=0;
-   litchamps(question->qQuestion);
-   litchamps(question->qReponse);
-   return 0;
-}
-
-void litchamps(dest)
-register char *dest;
-{
-   while (*dest++ = litc());
-}
-
-char litc()
-{
-    static char table[3][32] = {
-        {0,0,' ',0x88,0x8e,0x8f,'a','b','c','d','e','f','g','h','i','j','k','l',
-        'm','n','o','p','q','r','s','t','u','v','w','x','y','z'},
-        {'\0','!','"',0x89,0x9d,'%','&','\'','(',')',0x99,'+',',','-','.',0x8d,
-        '0','1','2','3','4','5','6','7','8','9',':',';','<','=',0xa1,'?'},
-        {0x90,0x91,0x94,0x95,0x9e,0x9f,'A','B','C','D','E','F','G','H','I','J','K',
-        'L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'}
-    };
-    char c;
-
-    switch (c = nextc()) {
-        case 0 : c = table[1][nextc()];
-                 break;
-        case 1 : c = table[2][nextc()];
-                 break;
-        default : c = table[0][c];
-    }
-    return c;
-}
-
-char nextc()
-{
-   static union {
-       word utw;
-       char utc[2];
-   } ut;
-
-   if (t)
-       t--;
-   else {
-       ut.utc[1] = *p++;
-       ut.utc[0] = *p++;
-       t = 2;
-   }
-   return (char)(ut.utw >> (5 * t + 1) & 0x001f);
-}
-
-void Ouvrir()
+void Ouvrir(void)
 {
     Word version;
     char verStr[8];
@@ -222,7 +124,7 @@ void Ouvrir()
     Close(&closeDCB);
 }
 
-void Enregistrer()
+void Enregistrer(void)
 {
     static CreateRec createDCB = { 7, &jeu.chemin, 0xc3, 0xF6, 0x6367};
     static Word version = VERSION;
@@ -238,4 +140,72 @@ void Enregistrer()
     Write(&IODCB);
     Close(&closeDCB);
     jeu.action = FALSE;
+}
+
+int fermeBase(void)
+{
+    if (baseOuverte) {
+        fclose(fbase);
+        free(index);
+        baseOuverte = FALSE;
+        return 0;
+    }
+}
+
+static int decode(tQuestion *question, long loc, FILE *fic)
+{
+   word l;
+   char buffer[256];
+
+   fseek(fic, loc, 0);
+   if (!fread((char *)&l, sizeof(l), 1, fic)) return errno;
+   if (!fread(buffer, 1, l, fic)) return errno;
+   p = buffer; t=0;
+   litchamps(question->qQuestion);
+   litchamps(question->qReponse);
+   return 0;
+}
+
+static void litchamps(register char *dest)
+{
+   while (*dest++ = litc());
+}
+
+static char litc(void)
+{
+    static char table[3][32] = {
+        {0,0,' ',0x88,0x8e,0x8f,'a','b','c','d','e','f','g','h','i','j','k','l',
+        'm','n','o','p','q','r','s','t','u','v','w','x','y','z'},
+        {'\0','!','"',0x89,0x9d,'%','&','\'','(',')',0x99,'+',',','-','.',0x8d,
+        '0','1','2','3','4','5','6','7','8','9',':',';','<','=',0xa1,'?'},
+        {0x90,0x91,0x94,0x95,0x9e,0x9f,'A','B','C','D','E','F','G','H','I','J','K',
+        'L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'}
+    };
+    char c;
+
+    switch (c = nextc()) {
+        case 0 : c = table[1][nextc()];
+                 break;
+        case 1 : c = table[2][nextc()];
+                 break;
+        default : c = table[0][c];
+    }
+    return c;
+}
+
+static char nextc(void)
+{
+   static union {
+       word utw;
+       char utc[2];
+   } ut;
+
+   if (t)
+       t--;
+   else {
+       ut.utc[1] = *p++;
+       ut.utc[0] = *p++;
+       t = 2;
+   }
+   return (char)(ut.utw >> (5 * t + 1) & 0x001f);
 }

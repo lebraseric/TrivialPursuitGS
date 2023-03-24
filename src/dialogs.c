@@ -6,7 +6,12 @@
 /*  Header application  */
 
 #include "trivial.h"
+#include "sounds.h"
+#include "desk.h"
 #include "dialogs.h"
+#include "os.h"
+#include "jfen.h"
+#include "initdesk.h"
 
 
 /*  Headers C standards  */
@@ -31,57 +36,17 @@
 // #include <mjuke.h>
 
 
-/*  Donnees de main.1  */
-
-extern Boolean sonActif;
-
-extern tInfoRec InfoRec;
-extern struct {
-    GSString255 chemin;
-    char nom[15];
-    Boolean nouveau, action;
-} jeu;
-extern struct {
-    Word diff;
-    Word de;
-    Word tour;
-    Word etape;
-    Boolean gagnee;
-    Byte dest[MAXDEST];
-    int ndest;
-    struct {
-        char nom[LNOM];
-        Word camemberts;
-        Byte position;
-        Boolean enJeu;
-        struct {
-            Word essai;
-            Word succes;
-        } total[6];
-    } joueur[6];
-} pJeu;
+static pascal int filterBase(long);
+static pascal int filterOuvrir(long);
+static Word PageLen(char *pg);
+static void InstrPage(int npage);
+static Word Compare(char *qRep, char *jRep);
+static void Majuscule(char *dest, char *chaine);
+static char *strnstr(char *src, char *sub, Word n);
+static int Ecrit(char *p, int v);
 
 
-/*  Donnees de jfen.1  */
-
-extern GrafPortPtr joueursDialog;
-
-
-/*  Donnees de dlgdata.1  */
-
-extern DialogTemplate infosTemp;
-extern DialogTemplate themeTemp;
-extern StringPtr themeBut1,themeBut2,themeBut3,themeBut4,themeBut5,themeBut6;
-
-
-/*  Donnees de ticons.1  */
-
-extern QDIconRecord camembertIcon;
-
-/* Donnees de sons.1 */
-extern DataBlock yeah;
-
-pascal int filterBase(long Dir)
+static pascal int filterBase(long Dir)
 {
         if ((*(word*)(Dir+0x10)==0xF5) && (*(word*)(Dir+0x1f)==0x6367))
                 return (displaySelect);
@@ -89,7 +54,7 @@ pascal int filterBase(long Dir)
                 return (noDisplay);
 }
 
-pascal int filterOuvrir(long Dir)
+static pascal int filterOuvrir(long Dir)
 {
         if ((*(word*)(Dir+0x10)==0xF6) && (*(word*)(Dir+0x1f)==0x6367))
                 return (displaySelect);
@@ -163,7 +128,6 @@ void DoInstr(void)
    GrafPortPtr  CurPort,dlgInstr;
    word         itemHit;
    int          page=0;
-   void         InstrPage();
 
    static ItemTemplate annuler = {
         2,
@@ -229,7 +193,7 @@ void DoInstr(void)
    CloseDialog(dlgInstr);
 }
 
-Word PageLen(char *pg)
+static Word PageLen(char *pg)
 {
         Word i;
 
@@ -237,7 +201,7 @@ Word PageLen(char *pg)
         return i;
 }
 
-void InstrPage(int npage)
+static void InstrPage(int npage)
 {
         static char  numPageStr[2];
         Rect  r;
@@ -688,10 +652,6 @@ et ainsi prendre part \210 cette \216pop\216e des temps modernes !\
 \r\r3614 RTEL1 ou RTEL2 Bal Zubrowka/^#0");
 }
 
-void AfficheTheme(Word theme)
-{
-}
-
 Word ChoixTheme(void)
 {
     static StringHandle themeLibel[6] = {
@@ -892,7 +852,7 @@ Questions \216puis\216es; la base va \220tre r\216initialis\216e./\
         }
 }
 
-Word Compare(char *qRep, char *jRep)
+static Word Compare(char *qRep, char *jRep)
 {
      int i=0;
      char cqRep[255];
@@ -912,7 +872,7 @@ Word Compare(char *qRep, char *jRep)
      return 0;
 }
 
-void Majuscule(char *dest, char *chaine)
+static void Majuscule(char *dest, char *chaine)
 {
         do {
                 switch (*chaine) {
@@ -954,7 +914,7 @@ void Majuscule(char *dest, char *chaine)
         } while (*chaine++);
 }
 
-char *strnstr(char *src, char *sub, Word n)
+static char *strnstr(char *src, char *sub, Word n)
 {
      char *p1, *p2;
      Word i;
@@ -994,7 +954,7 @@ Minitel : 3614 RTEL1 ou RTEL2 \15\
 Bal Zubrowka/^#6\0");
 }
 
-int Ecrit(char *p, int v)
+static int Ecrit(char *p, int v)
 {
     int i, npix;
     Boolean lf = FALSE, italique = FALSE, guillemet = FALSE;

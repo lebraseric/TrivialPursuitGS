@@ -13,7 +13,7 @@
 
 extern Word MyID;
 
-Word InitTools();
-void MemoryFull();
+Word InitTools(Word mode);
+void SysErr(void);
 
 #endif /* INITDESK_H */

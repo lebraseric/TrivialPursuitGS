@@ -6,6 +6,10 @@
 /*  Header application  */
 
 #include "trivial.h"
+#include "sounds.h"
+#include "desk.h"
+#include "dialogs.h"
+#include "jfen.h"
 
 
 /*  Headers Toolbox  */
@@ -17,65 +21,10 @@
 #include <window.h>
 #include <dialog.h>
 #include <qdaux.h>
+#include <menu.h>
 
 
-/*  Donnees de main.1  */
-
-extern Boolean sonActif;
-extern WmTaskRec tache;
-extern struct {
-    Word diff;
-    Word de;
-    Word tour;
-    Word etape;
-    Boolean gagnee;
-    Byte dest[MAXDEST];
-    int ndest;
-    struct {
-        char nom[LNOM];
-        Word camemberts;
-        Byte position;
-        Boolean enJeu;
-        struct {
-            Word essai;
-            Word succes;
-        } total[6];
-    } joueur[6];
-} pJeu;
-extern Handle imageHdl;
-
-
-/*  Donnees de jfen.1  */
-
-extern GrafPortPtr joueursDialog;
-
-
-/*  Donnees de ticons.1  */
-
-extern QDIconRecord homme1Icon;
-extern QDIconRecord homme2Icon;
-extern QDIconRecord homme3Icon;
-extern QDIconRecord femme1Icon;
-extern QDIconRecord femme2Icon;
-extern QDIconRecord femme3Icon;
-extern QDIconRecord pion1Icon;
-extern QDIconRecord pion2Icon;
-extern QDIconRecord pion3Icon;
-extern QDIconRecord pion4Icon;
-extern QDIconRecord pion5Icon;
-extern QDIconRecord pion6Icon;
-extern QDIconRecord pionCentreIcon;
-extern QDIconRecord pionDeIcon;
-
-
-/*  Donnees de sons.1  */
-
-extern DataBlock clap, decu;
-
-
-/*  Variables statiques  */
-
-struct {
+static struct {
     Byte type;
     Word x, y;
     Byte adj[6];
@@ -155,8 +104,12 @@ struct {
     { 0x02,  92,  26, { 71,  6, -1, -1, -1, -1 }}   /* 72 */
 };
 
+static void Question(void);
+static Word TrouveTheme(void);
+static void Explore(Byte, Byte, Word);
 
-void ClickBureau()
+
+void ClickBureau(void)
 {
     Word i;
     Rect r;
@@ -177,7 +130,7 @@ void ClickBureau()
             }
 }
 
-void Question()
+static void Question(void)
 {
     Word pos = pJeu.joueur[pJeu.tour].position, theme;
 
@@ -218,7 +171,7 @@ void Question()
       }
 }
 
-Word TrouveTheme()
+static Word TrouveTheme(void)
 {
     Word pos = pJeu.joueur[pJeu.tour].position, theme;
 
@@ -244,17 +197,13 @@ Word TrouveTheme()
     return theme;
 }
 
-void Chemins(pos, dep)
-Byte pos;
-Word dep;
+void Chemins(Byte pos, Word dep)
 {
     pJeu.ndest = 0;
     Explore(pos, pos, dep);
 }
 
-void Explore(pos, org, dep)
-Byte org, pos;
-Word dep;
+static void Explore(Byte pos, Byte org, Word dep)
 {
     Word i;
     Byte c;
@@ -269,7 +218,22 @@ Word dep;
         pJeu.dest[pJeu.ndest++] = pos;
 }
 
-void RedessineFond()
+void Coche(void)
+{
+    static int coche = 272;
+    int a;
+
+    switch (pJeu.diff) {
+        case 1 : a = 270; break;
+        case 2 : a = 271; break;
+        case 3 : a = 272; break;
+        case 4 : a = 277; break;
+    }
+    CheckMItem(FALSE, coche);
+    CheckMItem(TRUE, coche = a);
+}
+
+void RedessineFond(void)
 {
     Rect r;
 
@@ -277,7 +241,7 @@ void RedessineFond()
     RefreshDesktop(&r);
 }
 
-pascal void DessineFond()
+pascal void DessineFond(void)
 {
     static QDIconRecordPtr face[6] = {
         &homme1Icon,
@@ -308,14 +272,14 @@ pascal void DessineFond()
         phk
         plb
     }
-    HLock(imageHdl);
+    HLock((Handle)imageHdl);
     source.portSCB = 0;
-    source.ptrToPixImage = *imageHdl;
+    source.ptrToPixImage = (Pointer)*imageHdl;
     source.width = 160;
     SetRect(&source.boundsRect, 0, 0, 320, 200);
     SetRect(&r, 0, 0, 320, 187);
     PPToPort(&source, &r, 0, 13, modeCopy);
-    HUnlock(imageHdl);
+    HUnlock((Handle)imageHdl);
     DrawIcon((Pointer)face[pJeu.tour], 0,
         cases[pJeu.joueur[pJeu.tour].position].x - face[pJeu.tour]->iconWidth / 2,
         cases[pJeu.joueur[pJeu.tour].position].y - face[pJeu.tour]->iconHeight / 2);

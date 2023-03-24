@@ -5,119 +5,66 @@
 #ifndef TRIVIAL_H
 #define TRIVIAL_H
 
+#include "typedefs.h"
+#include <qdaux.h>
+#include <dialog.h>
 #include <types.h> 
 
-/*  Macros  */
 
-#define dtItemListLength 0x11
-
-#define LNOM            16
-#define DMAX            9
-#define PARTS           10
-#define DE              11
-#define MAXDEST         7
-#define LANCER_DE       0
-#define CHOISIR_CASE    1
-#define VERSION         0x0100
+extern int _toolErr;
 
 
-/*  Definitions de types  */
+// Screen background
 
-typedef struct {
-   Word qCarte, qSujet, qDiff;
-   char qQuestion[256], qReponse[256];
-} tQuestion;
-
-typedef struct {
-   char nom[30];
-   Word version;
-   Word nbQuest;
-   char theme[6][30];
-} tInfoRec;
-
-typedef struct {
-   Word length;
-   char data[];
-} DataBlock;
+extern DataBlock fondEcran;
 
 
-/*  Fonctions de main.1  */
+// Icons
 
-int main();
-void ActivationFen();
-void ByeBye();
-void InitFont();
-void ExecMenu();
-void DoQuitter();
-void DoNouveau();
-void DoSetDiff();
-void Coche();
-void DoActiveSon();
-void PlaceMenus();
-void DecompacteFond();
-void ColorCycle();
-void JoueSon();
-
-
-/*  Fonctions de dialogs.1  */
-
-int OuBase();
-void DoAbout();
-void DoOuvrir();
-void DoSauver();
-void DoSauverSous();
-void DoInstr();
-Word PageLen();
-void InstrPage();
-void DoNoms();
-void DoScores();
-void DoInfos();
-void Dialogue6Camemberts();
-void DialogueFinal();
-void DialogueBravo();
-Word ChoixTheme();
-Boolean DoQuestRep();
-Word Compare();
-void Majuscule();
-char *strnstr();
-int Ecrit();
-void Fermer();
+extern QDIconRecord homme1Icon;
+extern QDIconRecord homme2Icon;
+extern QDIconRecord homme3Icon;
+extern QDIconRecord femme1Icon;
+extern QDIconRecord femme2Icon;
+extern QDIconRecord femme3Icon;
+extern QDIconRecord pion1Icon;
+extern QDIconRecord pion2Icon;
+extern QDIconRecord pion3Icon;
+extern QDIconRecord pion4Icon;
+extern QDIconRecord pion5Icon;
+extern QDIconRecord pion6Icon;
+extern QDIconRecord pionCentreIcon;
+extern QDIconRecord pionDeIcon;
+extern QDIconRecord partIcon;
+extern QDIconRecord Un, Deux, Trois, Quatre, Cinq, Six, Cliquer;
+extern QDIconRecord camembertIcon;
 
 
-/*  Fonctions de desk.1  */
+// Dialogs data
 
-void ClickBureau();
-void Question();
-Word TrouveTheme();
-void Chemins();
-void Explore();
-void RedessineFond();
-pascal void DessineFond();
+extern DialogTemplate infosTemp;
+extern DialogTemplate themeTemp;
+extern StringPtr themeBut1,themeBut2,themeBut3,themeBut4,themeBut5,themeBut6;
 
 
-/*  Fonctions de jfen.1  */
+// Sounds
 
-void InitJoueursDialog();
-void DoModelessEvent();
-void LanceDe();
-void RedessineJFen();
-void ContenuJFen();
-pascal void DessineParts();
-pascal void DessineDe();
-void JoueurSuivant();
+extern DataBlock dice;
+extern DataBlock yeah;
+extern DataBlock clap;
+extern DataBlock decu;
 
 
-/*  Fonctions de os.1  */
+// Globals
 
-int initBase(/* char *cheminBase, tInfoRec *infoRec */);
-void reInitBase();
-int nouvQuest(/* tQuestion *question */);
-int fermeBase();
-int decode(/* tQuestion *question, long loc, FILE *fic */);
-void litchamps(/* char *dest */);
-char litc();
-char nextc();
-void Ouvrir();
-void Enregistrer();
+extern char titreActif[];
+extern char titreInactif[];
+extern Boolean sonActif;
+extern WmTaskRec tache;
+extern tInfoRec InfoRec;
+extern Jeu jeu;
+extern PJeu pJeu;
+extern Ecran **imageHdl;
+
 
 #endif /* TRIVIAL_H */

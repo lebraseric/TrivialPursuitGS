@@ -6,6 +6,9 @@
 /*  Header application  */
 
 #include "trivial.h"
+#include "sounds.h"
+#include "desk.h"
+#include "jfen.h"
 
 
 /*  Headers Toolbox  */
@@ -21,53 +24,12 @@
 #include <gsos.h>
 
 
-/*  Donnees de main.1  */
-
-extern WmTaskRec tache;
-extern struct {
-    GSString255 chemin;
-    char nom[15];
-    Boolean nouveau, action;
-} jeu;
-extern struct {
-    Word diff;
-    Word de;
-    Word tour;
-    Word etape;
-    Boolean gagnee;
-    Byte dest[MAXDEST];
-    int ndest;
-    struct {
-        char nom[LNOM];
-        Word camemberts;
-        Byte position;
-        Boolean enJeu;
-        struct {
-            Word essai;
-            Word succes;
-        } total[6];
-    } joueur[6];
-} pJeu;
-
-
-/*  Donnees de ticons.1  */
-
-extern QDIconRecord partIcon;
-extern QDIconRecord Un, Deux, Trois, Quatre, Cinq, Six, Cliquer;
-
-
-/*  Donnees de sons.1  */
-
-extern DataBlock dice;
-
-
-/*  Variables statiques  */
-
 GrafPortPtr joueursDialog;
-Rect deRect = { 153, 33, 176, 63 };
+
+static Rect deRect = { 153, 33, 176, 63 };
 
 
-void InitJoueursDialog()
+void InitJoueursDialog(void)
 {
     static Rect jFenBoundsRect = { 18, 223, 199, 319 };
     static WindColor jFenColors = { 0x0050, 0, 0, 0 };
@@ -96,7 +58,7 @@ void InitJoueursDialog()
     ShowWindow(joueursDialog);
 }
 
-void DoModelessEvent()
+void DoModelessEvent(void)
 {
     GrafPortPtr result;
     Word itemHit;
@@ -120,7 +82,7 @@ void DoModelessEvent()
         }
 }
 
-void LanceDe()
+void LanceDe(void)
 {
     Word tours, oldDe = 0xffff;
     LongWord dt;
@@ -143,7 +105,7 @@ void LanceDe()
     }
 }
 
-void RedessineJFen()
+void RedessineJFen(void)
 {
     Rect r;
     Word i;
@@ -161,7 +123,7 @@ void RedessineJFen()
     }
 }
 
-void ContenuJFen()
+void ContenuJFen(void)
 {
     Rect r;
     Word i, n;
@@ -178,9 +140,7 @@ void ContenuJFen()
     }
 }
 
-pascal void DessineParts(dialog, item)
-GrafPortPtr dialog;
-Word item;
+pascal void DessineParts(GrafPortPtr dialog, Word item)
 {
     int i, j;
 
@@ -190,9 +150,7 @@ Word item;
                 DrawIcon((Pointer)&partIcon, 0xe000 + j*256, j*10 + 10, i*25 + 17);
 }
 
-pascal void DessineDe(dialog, item)
-GrafPortPtr dialog;
-Word item;
+pascal void DessineDe(GrafPortPtr dialog, Word item)
 {
     static QDIconRecordPtr Des[7] = {&Un, &Deux, &Trois, &Quatre, &Cinq, &Six, &Cliquer};
     Rect r;
@@ -207,7 +165,7 @@ Word item;
     SetPenSize(oldPenSize.h, oldPenSize.v);
 }
 
-void JoueurSuivant()
+void JoueurSuivant(void)
 {
     Word i;
     Rect r;
