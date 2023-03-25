@@ -100,6 +100,7 @@ main()
     atexit(ByeBye);
     if (rc = InitTools(mode320))
         exit(rc);
+    sp_init();
     srand((word)TickCount());   /* init du generateur pseudo-aleatoire */
     PlaceMenus(5);
     DecompacteFond();
@@ -147,6 +148,7 @@ main()
 void ByeBye(void)
 {
     fermeBase();
+    sp_done();
     *border = old_border;
 }
 

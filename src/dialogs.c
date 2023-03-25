@@ -2,6 +2,7 @@
  *  dialogs.1 -- Gestion des dialogues de Trivial Pursuit
  */
 
+segment "dialogs";
 
 /*  Header application  */
 
@@ -356,7 +357,7 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
     MoveTo(25, 75);
     DrawCString("par Zubrowka et 42-Crew");
     MoveTo(20, 90);
-    DrawCString("Version 1.01 - 15/12/1990");
+    DrawCString("Version 1.9 - 25/03/2023");
     DrawIcon((Pointer)&camembertIcon, 0, 10, 10);
     ItemHit = ModalDialog(0L);
     CloseDialog(dlgAbout);
@@ -767,7 +768,8 @@ Boolean DoQuestRep(Word theme)
 
     Question.qSujet = theme;
     Question.qDiff = pJeu.diff; /*   Suivant la valeur du menu difficulte */
-    if ((rc = nouvQuest(&Question)) == 0) {
+    rc = io_GetQuestion(&Question);
+    if (rc == 0) {
          dlgQR = GetNewModalDialog(&tmpDlgQR);
          HideDItem(dlgQR, 3);
          HideDItem(dlgQR, 4);
