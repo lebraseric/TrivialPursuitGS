@@ -13,6 +13,7 @@ segment "dialogs";
 #include "os.h"
 #include "jfen.h"
 #include "initdesk.h"
+#include "trivapi.h"
 
 
 /*  Headers C standards  */
@@ -354,10 +355,14 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
     MoveTo(60, 25);
     DrawCString("Trivial Pursuit GS");
     InstallFont((FontID){ shaston, 0, 8 }, 0);
-    MoveTo(25, 75);
-    DrawCString("par Zubrowka et 42-Crew");
-    MoveTo(20, 90);
+    MoveTo(10, 55);
+    DrawCString("par Steph & Eric");
+    MoveTo(10, 70);
     DrawCString("Version 1.9 - 25/03/2023");
+    MoveTo(10, 85);
+    DrawCString("Utilise The Trivia API");
+    MoveTo(10, 95);
+    DrawCString("https://the-trivia-api.com/");
     DrawIcon((Pointer)&camembertIcon, 0, 10, 10);
     ItemHit = ModalDialog(0L);
     CloseDialog(dlgAbout);
@@ -766,9 +771,10 @@ Boolean DoQuestRep(Word theme)
         NULL
     };            
 
+    memset(&Question, 0, sizeof(Question));
     Question.qSujet = theme;
     Question.qDiff = pJeu.diff; /*   Suivant la valeur du menu difficulte */
-    rc = io_GetQuestion(&Question);
+    rc = trivapi_GetQuestion(&Question);
     if (rc == 0) {
          dlgQR = GetNewModalDialog(&tmpDlgQR);
          HideDItem(dlgQR, 3);

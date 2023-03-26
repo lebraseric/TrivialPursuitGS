@@ -11,13 +11,13 @@ CFLAGS = -I -P cc=-i"src"
 
 OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a \
 	obj/jfen.a obj/os.a obj/initdesk.a obj/sounds.a obj/sp.a \
-	obj/io.a obj/ticons.a obj/sons.a obj/dlgdata.a
+	obj/trivapi.a obj/ticons.a obj/sons.a obj/dlgdata.a
 
 all : obj macros $(TARGETS)
 
 .PHONY: clean
 clean:
-	rm $(TARGETS) obj/* macros/*
+	rm -f $(TARGETS) obj/* macros/*
 	rmdir obj macros
 
 obj macros:
@@ -27,7 +27,7 @@ trivial: $(OBJECTS)
 	$(LINK) \
 	obj/startup obj/main obj/dialogs obj/desk obj/jfen obj/os \
 	obj/initdesk obj/ticons obj/sons obj/dlgdata obj/sounds \
-	obj/sp obj/io \
+	obj/sp obj/trivapi \
 	keep=$@
 
 append: obj/append.a
@@ -74,7 +74,7 @@ obj/sounds.a: src/sounds.c src/sounds.h src/trivial.h
 obj/sp.a: src/sp.c src/sp.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
-obj/io.a: src/io.c src/io.h
+obj/trivapi.a: src/trivapi.c src/trivapi.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
 obj/ticons.a: src/ticons.asm src/fond.pak.asm
@@ -101,7 +101,7 @@ obj/corrige.a: tools/corrige.c
 obj/merge.a: tools/merge.c
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
-install: trivial
+dist: trivial
 	cp base.po trivial.po
 	ac.sh -p trivial.po Trivial s16 <$?
 	scp trivial.po rpi4:/tnfs

@@ -1,5 +1,5 @@
 /*
- *  io.c -- Network I/O routines
+ *  trivapi.c -- Network I/O routines
  */
 
 
@@ -7,7 +7,7 @@
 
 segment "fujinet";
 
-#include "io.h"
+#include "trivapi.h"
 #include "sp.h"
 #include "trivial.h"
 #include "jsmn.h"
@@ -19,21 +19,22 @@ segment "fujinet";
 
 static char *url = "N:https://the-trivia-api.com/api/questions?limit=1";
 static char JSON_STRING[MAXBUFF];
+static char message[100];
 
-static void io_open_url(uint8_t mode, uint8_t trans, char *url);
-static void io_close_url(void);
-static size_t io_get_response(void);
+static void trivapi_open_url(uint8_t mode, uint8_t trans, char *url);
+static void trivapi_close_url(void);
+static uint16_t trivapi_get_response(void);
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
+static trivapi_check_str_length(int *len, int max, char *field);
 
-int io_GetQuestion(tQuestion *Question)
+int trivapi_GetQuestion(tQuestion *Question)
 {
-  size_t len;
+  uint16_t len;
   int i;
   int r;
   int l;
   jsmn_parser p;
   jsmntok_t t[300]; /* We expect no more than 128 tokens */
-  char message[100];
 
   Question->qCarte = 1;
   Question->qSujet = 1;
@@ -41,11 +42,11 @@ int io_GetQuestion(tQuestion *Question)
 
   sp_open(sp_dest);
 
-  io_open_url(4, 0, url);
+  trivapi_open_url(4, 0, url);
 
-  len = io_get_response();
+  len = trivapi_get_response();
 
-  io_close_url();
+  trivapi_close_url();
   sp_close(sp_dest);
 
   jsmn_init(&p);
@@ -67,28 +68,48 @@ int io_GetQuestion(tQuestion *Question)
   for (i = 1; i < r; i++) {
     if (t[i].type == JSMN_OBJECT)
       i++;
-    if (jsoneq(JSON_STRING, &t[i], "question") == 0) {
+    if (jsoneq(JSON_STRING, &t[i], "category") == 0) {
       l = t[i + 1].end - t[i + 1].start;
-      if (l > 255)
-        l = 255;
-      memcpy(Question->qQuestion, JSON_STRING + t[i + 1].start, l);
+      trivapi_check_str_length(&l, 30, "category");
+      memcpy(Question->category, JSON_STRING + t[i + 1].start, l);
+      Question->qQuestion[l] = '\0';
+      i++;
+    } else if (jsoneq(JSON_STRING, &t[i], "id") == 0) {
+      l = t[i + 1].end - t[i + 1].start;
+      trivapi_check_str_length(&l, 25, "id");
+      memcpy(Question->id, JSON_STRING + t[i + 1].start, l);
       Question->qQuestion[l] = '\0';
       i++;
     } else if (jsoneq(JSON_STRING, &t[i], "correctAnswer") == 0) {
       l = t[i + 1].end - t[i + 1].start;
-      if (l > 255)
-        l = 255;
+      trivapi_check_str_length(&l, 120, "correctAnswer");
       memcpy(Question->qReponse, JSON_STRING + t[i + 1].start, l);
+      Question->qReponse[l] = '\0';
+      i++;
+    } else if (jsoneq(JSON_STRING, &t[i], "question") == 0) {
+      l = t[i + 1].end - t[i + 1].start;
+      trivapi_check_str_length(&l, 120, "question");
+      memcpy(Question->qQuestion, JSON_STRING + t[i + 1].start, l);
+      Question->qQuestion[l] = '\0';
+      i++;
+    } else if (jsoneq(JSON_STRING, &t[i], "type") == 0) {
+      l = t[i + 1].end - t[i + 1].start;
+      trivapi_check_str_length(&l, 30, "type");
+      memcpy(Question->type, JSON_STRING + t[i + 1].start, l);
+      Question->qReponse[l] = '\0';
+      i++;
+    } else if (jsoneq(JSON_STRING, &t[i], "difficulty") == 0) {
+      l = t[i + 1].end - t[i + 1].start;
+      trivapi_check_str_length(&l, 10, "difficulty");
+      memcpy(Question->difficulty, JSON_STRING + t[i + 1].start, l);
       Question->qReponse[l] = '\0';
       i++;
     }
   }
-
-
   return 0;
 }
 
-static void io_open_url(uint8_t mode, uint8_t trans, char *url)
+static void trivapi_open_url(uint8_t mode, uint8_t trans, char *url)
 {
   unsigned char idx = 0;
   uint16_t s;
@@ -105,7 +126,7 @@ static void io_open_url(uint8_t mode, uint8_t trans, char *url)
   sp_error = sp_control(sp_dest, 'O');
 }
 
-static void io_close_url(void)
+static void trivapi_close_url(void)
 {
   sp_payload[0] = 0;
   sp_payload[1] = 0;
@@ -113,7 +134,7 @@ static void io_close_url(void)
   sp_error = sp_control(sp_dest, 'C');
 }
 
-static size_t io_get_response(void)
+static uint16_t trivapi_get_response(void)
 {
   unsigned short bw; // Bytes waiting
   unsigned short l = MAXBUFF;
@@ -146,4 +167,13 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
     return 0;
   }
   return -1;
+}
+
+static trivapi_check_str_length(int *len, int max, char *field)
+{
+  if (*len > max - 1) {
+    sprintf(message, "70/%s overflow: %d/^#6", field, *len);
+    AlertWindow(0, NULL, (Ref)message);
+    *len = max - 1;
+  }
 }
