@@ -10,170 +10,88 @@ segment "fujinet";
 #include "trivapi.h"
 #include "sp.h"
 #include "trivial.h"
-#include "jsmn.h"
 #include <stdint.h>
 #include <string.h>
 #include <window.h>
 
-#define MAXBUFF 1000
-
 static char *url = "N:https://the-trivia-api.com/api/questions?limit=1";
-static char JSON_STRING[MAXBUFF];
-static char message[100];
+// static char message[100];
 
-static void trivapi_open_url(uint8_t mode, uint8_t trans, char *url);
-static void trivapi_close_url(void);
-static uint16_t trivapi_get_response(void);
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s);
-static trivapi_check_str_length(int *len, int max, char *field);
+static void trivapi_json_query(const char *query);
 
 int trivapi_GetQuestion(tQuestion *Question)
 {
-  uint16_t len;
-  int i;
-  int r;
-  int l;
-  jsmn_parser p;
-  jsmntok_t t[300]; /* We expect no more than 128 tokens */
+  const char category_query[]="/0/category";
+  const char id_query[]="/0/id";
+  const char correctAnswer_query[]="/0/correctAnswer";
+  const char question_query[]="/0/question";
+  const char type_query[]="/0/type";
+  const char difficulty_query[]="/0/difficulty";
 
   Question->qCarte = 1;
   Question->qSujet = 1;
   Question->qDiff = 1;
 
-  sp_open(sp_dest);
+  // Open
+  sp_open(sp_net);
+  if (sp_error > 0)
+    AlertWindow(0, NULL, (Ref)"24/Failed to open network device!/^#6");
+  sp_payload[0]=(strlen(url) & 0xFF) + 2;
+  sp_payload[1]=(strlen(url) >> 8);
+  sp_payload[2]=0x0C; // GET
+  sp_payload[3]=0x80; // No translation
+  memcpy(&sp_payload[4],url,strlen(url));
+  sp_control(sp_net,'O'); // Do open.
+  if (sp_error > 0)
+    AlertWindow(0, NULL, (Ref)"24/Failed to open URL!/^#6");
 
-  trivapi_open_url(4, 0, url);
+  // Set channel mode
+  sp_payload[0]=0x01; // length of packet.
+  sp_payload[1]=0x00;
+  sp_payload[2]=0x01; // Set to JSON mode
+  sp_control(sp_net,0xFC); // Do it.
 
-  len = trivapi_get_response();
+  // Parse the JSON
+  sp_control(sp_net,'P'); // Do the parse
+  if (sp_error > 0)
+    AlertWindow(0, NULL, (Ref)"24/JSON parsing error!/^#6");
 
-  trivapi_close_url();
-  sp_close(sp_dest);
+  trivapi_json_query(category_query);
+  strncpy(Question->category, sp_payload, sizeof(Question->category)-1);
+  trivapi_json_query(id_query);
+  strncpy(Question->id, sp_payload, sizeof(Question->id)-1);
+  trivapi_json_query(correctAnswer_query);
+  strncpy(Question->qReponse, sp_payload, sizeof(Question->qReponse)-1);
+  trivapi_json_query(question_query);
+  strncpy(Question->qQuestion, sp_payload, sizeof(Question->qQuestion)-1);
+  trivapi_json_query(type_query);
+  strncpy(Question->type, sp_payload, sizeof(Question->type)-1);
+  trivapi_json_query(difficulty_query);
+  strncpy(Question->difficulty, sp_payload, sizeof(Question->difficulty)-1);
 
-  jsmn_init(&p);
-  r = jsmn_parse(&p, JSON_STRING, len, t,
-                 sizeof(t) / sizeof(t[0]));
-  if (r < 0) {
-    sprintf(message, "70/Failed to parse JSON: %d/^#6", r);
-    AlertWindow(0, NULL, (Ref)message);
-    return 1;
-  }
+  sp_payload[0] = 0;
+  sp_payload[1] = 0;
+  sp_control(sp_net, 'C');
+  
+  sp_close(sp_net);
+  // sprintf(message, "90/Question=%.8lX/^#6", Question);
+  // AlertWindow(0, NULL, (Ref)message);
 
-  /* Assume the top-level element is an object */
-  if (t[0].type != JSMN_ARRAY) {
-    sprintf(message, "70/Not an array/^#6");
-    AlertWindow(0, NULL, (Ref)message);
-    return 1;
-  }
-
-  for (i = 1; i < r; i++) {
-    if (t[i].type == JSMN_OBJECT)
-      i++;
-    if (jsoneq(JSON_STRING, &t[i], "category") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 30, "category");
-      memcpy(Question->category, JSON_STRING + t[i + 1].start, l);
-      Question->qQuestion[l] = '\0';
-      i++;
-    } else if (jsoneq(JSON_STRING, &t[i], "id") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 25, "id");
-      memcpy(Question->id, JSON_STRING + t[i + 1].start, l);
-      Question->qQuestion[l] = '\0';
-      i++;
-    } else if (jsoneq(JSON_STRING, &t[i], "correctAnswer") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 120, "correctAnswer");
-      memcpy(Question->qReponse, JSON_STRING + t[i + 1].start, l);
-      Question->qReponse[l] = '\0';
-      i++;
-    } else if (jsoneq(JSON_STRING, &t[i], "question") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 120, "question");
-      memcpy(Question->qQuestion, JSON_STRING + t[i + 1].start, l);
-      Question->qQuestion[l] = '\0';
-      i++;
-    } else if (jsoneq(JSON_STRING, &t[i], "type") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 30, "type");
-      memcpy(Question->type, JSON_STRING + t[i + 1].start, l);
-      Question->qReponse[l] = '\0';
-      i++;
-    } else if (jsoneq(JSON_STRING, &t[i], "difficulty") == 0) {
-      l = t[i + 1].end - t[i + 1].start;
-      trivapi_check_str_length(&l, 10, "difficulty");
-      memcpy(Question->difficulty, JSON_STRING + t[i + 1].start, l);
-      Question->qReponse[l] = '\0';
-      i++;
-    }
-  }
   return 0;
 }
 
-static void trivapi_open_url(uint8_t mode, uint8_t trans, char *url)
+static void trivapi_json_query(const char *query)
 {
-  unsigned char idx = 0;
-  uint16_t s;
+  unsigned short len;
 
-  // to do - copy strings into payload and figure out length
-  s = 1 + 1 + strlen(url);
-  sp_payload[idx++] = (uint8_t)(s & 0xFF);
-  sp_payload[idx++] = (uint8_t)(s >> 8);
-  sp_payload[idx++] = mode;
-  sp_payload[idx++] = trans;
-
-  strcpy((char *)&sp_payload[idx++], url);
-
-  sp_error = sp_control(sp_dest, 'O');
-}
-
-static void trivapi_close_url(void)
-{
-  sp_payload[0] = 0;
+  memset(sp_payload, 0, sizeof(sp_payload));
+  sp_payload[0] = strlen(query);
   sp_payload[1] = 0;
-
-  sp_error = sp_control(sp_dest, 'C');
-}
-
-static uint16_t trivapi_get_response(void)
-{
-  unsigned short bw; // Bytes waiting
-  unsigned short l = MAXBUFF;
-  uint16_t pt = 0;
-
-  do {
-    sp_status(sp_dest, 'S');
-    bw = sp_payload[0];
-    bw |= (sp_payload[1]) << 8;
-    if (bw == 0)
-      break;
-    if (bw > l) {
-      AlertWindow(0, NULL, (Ref)"24/JSON buffer too small!/^#6");
-      break;
-    }
-    memset(sp_payload, 0, sizeof(sp_payload));
-    sp_read(sp_dest, bw);
-    memcpy(&JSON_STRING[pt], sp_payload, bw);
-    pt += bw;
-    JSON_STRING[pt] = '\0';
-    l -= bw;
-  } while (true);
-  return pt;
-}
-
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
-{
-  if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
-      strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-    return 0;
-  }
-  return -1;
-}
-
-static trivapi_check_str_length(int *len, int max, char *field)
-{
-  if (*len > max - 1) {
-    sprintf(message, "70/%s overflow: %d/^#6", field, *len);
-    AlertWindow(0, NULL, (Ref)message);
-    *len = max - 1;
-  }
+  strcpy(&sp_payload[2], query);
+  sp_control(sp_net, 'Q'); // Query
+  sp_status(sp_net, 'S'); // Get Status
+  len=(unsigned short)sp_payload[0];
+  memset(sp_payload, 0, sizeof(sp_payload));
+  sp_read(sp_net, len); // Get Result
+  sp_payload[len] = '\0';
 }

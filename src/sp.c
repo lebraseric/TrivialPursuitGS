@@ -32,6 +32,7 @@ segment "fujinet";
 uint8_t *sp_payload;
 uint16_t sp_count;
 uint8_t sp_dest;
+uint8_t sp_net;
 uint16_t sp_dispatch;
 uint8_t sp_error;
 
@@ -76,7 +77,6 @@ int8_t sp_status(uint8_t dest, uint8_t statcode)
 int8_t sp_control(uint8_t dest, uint8_t ctrlcode)
 {
   sp_error = 0;
-  // sp_dest = 5; // need to search
   // build the command list
   sp_cmdlist[0] = SP_CONTROL_PARAM_COUNT;
   sp_cmdlist[1] = dest; // set before calling sp_status();
@@ -244,7 +244,7 @@ int8_t sp_find_network()
           for (j = 0; j < net_len; j++)
             if (net[j]!=sp_payload[5+j])
               return 0;
-          sp_dest = i; // store the fuji unit #
+          sp_net = i; // store the fuji unit #
           return i;
         }
     }

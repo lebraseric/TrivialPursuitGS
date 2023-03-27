@@ -58,7 +58,8 @@ typedef struct {
 
 typedef struct {
    Word qCarte, qSujet, qDiff;
-   char qQuestion[120], qReponse[120];
+   char qQuestion[120];
+   char qReponse[120];
    char category[30];
    char id[25];
    char incorrectAnswer[3][120];
