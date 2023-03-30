@@ -55,7 +55,7 @@ int main()
 static void event_loop(void)
 {
     int code;
-    int quit;
+    int quit = false;
 
     tache.wmTaskMask = 0x1FFF;
     FlushEvents(everyEvent & ~mDownMask & ~mUpMask, 0);
