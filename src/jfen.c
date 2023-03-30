@@ -78,7 +78,6 @@ void DoModelessEvent(void)
                 break;
             case 11 :
                 LanceDe();
-                jeu.action = TRUE;
         }
 }
 
@@ -95,13 +94,14 @@ void LanceDe(void)
                 pJeu.de = rand() % 6;
             while (pJeu.de == oldDe);
             DessineDe(joueursDialog, DE);
-            JoueSon(&dice, 200, 1);
+            JoueSon(&dice, 200);
             dt = TickCount() + (long)(4 + rand() % 20);
             oldDe = pJeu.de;
         }
         Chemins(pJeu.joueur[pJeu.tour].position, pJeu.de+1);
         pJeu.etape = CHOISIR_CASE;
         RedessineFond();
+        jeu.action = true;
     }
 }
 

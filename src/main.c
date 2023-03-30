@@ -2,7 +2,6 @@
  *  main.1 -- Module principal de Trivial Pursuit
  */
 
-
 /*  Headers application  */
 
 #include "trivial.h"
@@ -19,20 +18,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-
 /*  Headers Toolbox  */
 
 #include <types.h>
-// #include <memory.h>
-// #include <misctool.h>
-// #include <quickdraw.h>
-// #include <font.h>
 #include <event.h>
 #include <window.h>
 #include <menu.h>
 #include <dialog.h>
-// #include <desk.h>
-// #include <gsos.h>
 
 char titreActif[]="\pSon actif";
 char titreInactif[]="\pSon inactif";
@@ -60,7 +52,7 @@ int main()
     *border = old_border;
 }
 
-void event_loop(void)
+static void event_loop(void)
 {
     int code;
     int quit;
@@ -85,7 +77,6 @@ void event_loop(void)
             case keyDownEvt :
                 if ((tache.message & 0xff) == '\r') {
                     LanceDe();
-                    jeu.action = TRUE;
                 }
                 break;
         }
@@ -94,7 +85,7 @@ void event_loop(void)
     } while (true);
 }
 
-void ActivationFen(void)
+static void ActivationFen(void)
 {
     if (tache.modifiers & activeFlag)
         SetMenuFlag(disableMenu, 3);
@@ -130,7 +121,7 @@ static void ExecMenu(const int art, int *quit)
     HiliteMenu(FALSE, (int)(tache.wmTaskData >> 16));
 }
 
-void DoSetDiff(int article)
+static void DoSetDiff(int article)
 {
     switch (article) {
         case 270 : pJeu.diff = 1; break;

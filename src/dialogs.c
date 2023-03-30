@@ -820,7 +820,7 @@ Boolean DoQuestRep(Word theme)
                         case 2 :
                             MoveTo(50, 143);
                             if (sonActif)
-                                JoueSon(&yeah, 200, 0);
+                                JoueSon(&yeah, 200);
                             DrawCString("Bravo !!! R\216ponse exacte !!!");
                     }
              }

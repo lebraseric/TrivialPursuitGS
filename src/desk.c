@@ -147,7 +147,7 @@ static void Question(void)
                         GetPortRect(&r);
                         InvalRect(&r);
                         if (sonActif)
-                             JoueSon(&clap, 100, 0);
+                             JoueSon(&clap, 100);
                         if (pJeu.joueur[pJeu.tour].camemberts == 0x003f)
                              Dialogue6Camemberts();
                     }
@@ -166,7 +166,7 @@ static void Question(void)
         }
     } else {
         if ((cases[pos].type >> 4)==1 && sonActif)
-                JoueSon(&decu, 215, 0);
+                JoueSon(&decu, 215);
         JoueurSuivant();
       }
 }
