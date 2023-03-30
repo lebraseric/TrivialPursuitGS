@@ -1,49 +1,60 @@
 /*
- *  trivapi.c -- Network I/O routines
+ *  trivapi.c -- The Trivia API queries
  */
 
-
-/*  Header application  */
 
 segment "fujinet";
 
 #include "trivapi.h"
+#include "net.h"
 #include "sp.h"
 #include "trivial.h"
 #include <stdint.h>
 #include <string.h>
 #include <window.h>
 
-static char *url = "N:https://the-trivia-api.com/api/questions?limit=1";
-// static char message[100];
+static const char category_query[] = "/0/category";
+static const char id_query[] = "/0/id";
+static const char correctAnswer_query[] = "/0/correctAnswer";
+static const char incorrectAnswer0_query[] = "/0/incorrectAnswers/0";
+static const char incorrectAnswer1_query[] = "/0/incorrectAnswers/1";
+static const char incorrectAnswer2_query[] = "/0/incorrectAnswers/2";
+static const char question_query[] = "/0/question";
+static const char type_query[] = "/0/type";
+static const char difficulty_query[] = "/0/difficulty";
 
-static void trivapi_json_query(const char *query);
 
-int trivapi_GetQuestion(tQuestion *Question)
+static void make_url(const tQuestion *question, const char *url);
+static void json_query(const char *query);
+
+/*
+ * Function:  trivapi_GetQuestion
+ * ------------------------------
+ *  Gets a question and answer from the-trivia-api.com.
+ *
+ *  question: structure where the question data is put
+ *            On entry, question->qSujet must contain the desired category (0
+ *            through 5), question->qDiff must contain the desired difficulty
+ *            (1 through 4).
+ *
+ *  returns: zero if OK
+ *           returns non zero on error
+ */
+
+int trivapi_GetQuestion(tQuestion *question)
 {
-  const char category_query[]="/0/category";
-  const char id_query[]="/0/id";
-  const char correctAnswer_query[]="/0/correctAnswer";
-  const char question_query[]="/0/question";
-  const char type_query[]="/0/type";
-  const char difficulty_query[]="/0/difficulty";
+  const char url[120];
+  int result;
 
-  Question->qCarte = 1;
-  Question->qSujet = 1;
-  Question->qDiff = 1;
+  make_url(question, url);
+
+  question->qCarte = 0;
 
   // Open
-  sp_open(sp_net);
-  if (sp_error > 0)
-    AlertWindow(0, NULL, (Ref)"24/Failed to open network device!/^#6");
-  sp_payload[0]=(strlen(url) & 0xFF) + 2;
-  sp_payload[1]=(strlen(url) >> 8);
-  sp_payload[2]=0x0C; // GET
-  sp_payload[3]=0x80; // No translation
-  memcpy(&sp_payload[4],url,strlen(url));
-  sp_control(sp_net,'O'); // Do open.
-  if (sp_error > 0)
-    AlertWindow(0, NULL, (Ref)"24/Failed to open URL!/^#6");
+  if ((result = sp_open(sp_net)) > 0)
+    return result;
+  if ((result = net_open_url(sp_net, 0x0C, 0x80, url)) > 0)
+    return result;
 
   // Set channel mode
   sp_payload[0]=0x01; // length of packet.
@@ -56,31 +67,45 @@ int trivapi_GetQuestion(tQuestion *Question)
   if (sp_error > 0)
     AlertWindow(0, NULL, (Ref)"24/JSON parsing error!/^#6");
 
-  trivapi_json_query(category_query);
-  strncpy(Question->category, sp_payload, sizeof(Question->category)-1);
-  trivapi_json_query(id_query);
-  strncpy(Question->id, sp_payload, sizeof(Question->id)-1);
-  trivapi_json_query(correctAnswer_query);
-  strncpy(Question->qReponse, sp_payload, sizeof(Question->qReponse)-1);
-  trivapi_json_query(question_query);
-  strncpy(Question->qQuestion, sp_payload, sizeof(Question->qQuestion)-1);
-  trivapi_json_query(type_query);
-  strncpy(Question->type, sp_payload, sizeof(Question->type)-1);
-  trivapi_json_query(difficulty_query);
-  strncpy(Question->difficulty, sp_payload, sizeof(Question->difficulty)-1);
+  json_query(category_query);
+  strncpy(question->category, sp_payload, sizeof(question->category)-1);
+  json_query(id_query);
+  strncpy(question->id, sp_payload, sizeof(question->id)-1);
+  json_query(correctAnswer_query);
+  strncpy(question->qReponse, sp_payload, sizeof(question->qReponse)-1);
+  json_query(incorrectAnswer0_query);
+  strncpy(question->incorrectAnswer[0], sp_payload, sizeof(question->incorrectAnswer[0])-1);
+  json_query(incorrectAnswer1_query);
+  strncpy(question->incorrectAnswer[1], sp_payload, sizeof(question->incorrectAnswer[1])-1);
+  json_query(incorrectAnswer2_query);
+  strncpy(question->incorrectAnswer[2], sp_payload, sizeof(question->incorrectAnswer[2])-1);
+  json_query(question_query);
+  strncpy(question->qQuestion, sp_payload, sizeof(question->qQuestion)-1);
+  json_query(type_query);
+  strncpy(question->type, sp_payload, sizeof(question->type)-1);
+  json_query(difficulty_query);
+  strncpy(question->difficulty, sp_payload, sizeof(question->difficulty)-1);
 
   sp_payload[0] = 0;
   sp_payload[1] = 0;
   sp_control(sp_net, 'C');
   
   sp_close(sp_net);
-  // sprintf(message, "90/Question=%.8lX/^#6", Question);
-  // AlertWindow(0, NULL, (Ref)message);
 
   return 0;
 }
 
-static void trivapi_json_query(const char *query)
+static void make_url(const tQuestion *question, const char *url)
+{
+  static const char category_parm[][20] =
+    {"geography","film_and_tv","history","arts_and_literature","science","sport_and_leisure"};
+  static const char difficulty_parm[][8] = {"easy","medium","hard","hard"};
+
+  sprintf(url, "N:https://the-trivia-api.com/api/questions?limit=1&categories=%s&difficulty=%s",
+    category_parm[question->qSujet-1], difficulty_parm[question->qDiff-1]);
+}
+
+static void json_query(const char *query)
 {
   unsigned short len;
 

@@ -7,6 +7,6 @@
 
 #include "typedefs.h"
 
-int trivapi_GetQuestion(tQuestion *);
+int trivapi_GetQuestion(tQuestion *question);
 
 #endif /* TRIVAPI_H */

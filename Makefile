@@ -7,11 +7,11 @@ ASSEMBLE = iix assemble
 LINK = iix link
 MACGEN = iix macgen
 
-CFLAGS = -I -P cc=-i"src"
+CFLAGS = -I -P +T cc=-i"src"
 
 OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a \
 	obj/jfen.a obj/os.a obj/initdesk.a obj/sounds.a obj/sp.a \
-	obj/trivapi.a obj/ticons.a obj/sons.a obj/dlgdata.a
+	obj/net.a obj/trivapi.a obj/ticons.a obj/sons.a obj/dlgdata.a
 
 all : obj macros $(TARGETS)
 
@@ -27,7 +27,7 @@ trivial: $(OBJECTS)
 	$(LINK) \
 	obj/startup obj/main obj/dialogs obj/desk obj/jfen obj/os \
 	obj/initdesk obj/ticons obj/sons obj/dlgdata obj/sounds \
-	obj/sp obj/trivapi \
+	obj/sp obj/net obj/trivapi \
 	keep=$@
 
 append: obj/append.a
@@ -72,6 +72,9 @@ obj/sounds.a: src/sounds.c src/sounds.h src/trivial.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
 obj/sp.a: src/sp.c src/sp.h
+	$(COMPILE) $(CFLAGS) $< keep=obj/$$
+
+obj/net.a: src/net.c src/net.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
 obj/trivapi.a: src/trivapi.c src/trivapi.h
