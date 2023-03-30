@@ -9,9 +9,9 @@ MACGEN = iix macgen
 
 CFLAGS = -I -P +T cc=-i"src"
 
-OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a \
-	obj/jfen.a obj/os.a obj/initdesk.a obj/sounds.a obj/sp.a \
-	obj/net.a obj/trivapi.a obj/ticons.a obj/sons.a obj/dlgdata.a
+OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a obj/jfen.a \
+	obj/os.a obj/initdesk.a obj/sounds.a obj/sp.a obj/net.a obj/trivapi.a \
+	obj/game.a obj/ticons.a obj/sons.a obj/dlgdata.a
 
 all : obj macros $(TARGETS)
 
@@ -27,7 +27,7 @@ trivial: $(OBJECTS)
 	$(LINK) \
 	obj/startup obj/main obj/dialogs obj/desk obj/jfen obj/os \
 	obj/initdesk obj/ticons obj/sons obj/dlgdata obj/sounds \
-	obj/sp obj/net obj/trivapi \
+	obj/sp obj/net obj/trivapi obj/game \
 	keep=$@
 
 append: obj/append.a
@@ -78,6 +78,9 @@ obj/net.a: src/net.c src/net.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
 obj/trivapi.a: src/trivapi.c src/trivapi.h
+	$(COMPILE) $(CFLAGS) $< keep=obj/$$
+
+obj/game.a: src/game.c src/game.h
 	$(COMPILE) $(CFLAGS) $< keep=obj/$$
 
 obj/ticons.a: src/ticons.asm src/fond.pak.asm

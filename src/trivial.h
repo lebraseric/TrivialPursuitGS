@@ -11,9 +11,6 @@
 #include <types.h> 
 
 
-extern int _toolErr;
-
-
 // Screen background
 
 extern DataBlock fondEcran;

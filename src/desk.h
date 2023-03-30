@@ -11,7 +11,6 @@
 
 void ClickBureau(void);
 void Chemins(Byte, Word);
-void Coche(void);
 void RedessineFond(void);
 pascal void DessineFond(void);
 

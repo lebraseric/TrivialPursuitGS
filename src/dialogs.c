@@ -94,7 +94,7 @@ void DoOuvrir(void)
              Ouvrir();
              jeu.nouveau = FALSE;
              jeu.action = FALSE;
-             Coche();
+             check_difficulty_menu();
              RedessineJFen();
              RedessineFond();
          }

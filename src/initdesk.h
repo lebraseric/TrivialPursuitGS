@@ -13,7 +13,8 @@
 
 extern Word MyID;
 
-Word InitTools(Word mode);
+int init_startup();
+void check_difficulty_menu(void);
 void SysErr(void);
 
 #endif /* INITDESK_H */

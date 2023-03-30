@@ -57,10 +57,10 @@ int trivapi_GetQuestion(tQuestion *question)
 
 static void make_url(const tQuestion *question, char *url)
 {
-  static const char category_parm[][20] =
-    {"geography","film_and_tv","history","arts_and_literature","science",
-    "sport_and_leisure"};
-  static const char difficulty_parm[][8] = {"easy","medium","hard","hard"};
+  const char const *category_parm[] =
+    { "geography","film_and_tv","history","arts_and_literature","science",
+    "sport_and_leisure" };
+  const char const *difficulty_parm[] = { "easy","medium","hard","hard" };
 
   sprintf(url, "N:https://the-trivia-api.com/api/questions?limit=1&categories=%s&difficulty=%s",
     category_parm[question->qSujet-1], difficulty_parm[question->qDiff-1]);

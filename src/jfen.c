@@ -1,5 +1,5 @@
 /*
- *  desk.1 -- Mise a jour fenetre joueurs
+ *  jfen.c -- Mise a jour fenetre joueurs
  */
 
 

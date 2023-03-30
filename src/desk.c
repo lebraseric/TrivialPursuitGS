@@ -218,21 +218,6 @@ static void Explore(Byte pos, Byte org, Word dep)
         pJeu.dest[pJeu.ndest++] = pos;
 }
 
-void Coche(void)
-{
-    static int coche = 272;
-    int a;
-
-    switch (pJeu.diff) {
-        case 1 : a = 270; break;
-        case 2 : a = 271; break;
-        case 3 : a = 272; break;
-        case 4 : a = 277; break;
-    }
-    CheckMItem(FALSE, coche);
-    CheckMItem(TRUE, coche = a);
-}
-
 void RedessineFond(void)
 {
     Rect r;
