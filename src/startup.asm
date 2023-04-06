@@ -5,7 +5,6 @@
 *     Affiche l'image TRIVIAL.PIC                               *
 *                                                               *
 *     Version 0.2    13/11/89  (Ajout decompactage de l'image)  *
-*     Version 0.3    23/03/23  (Renommage macros AppleUtil)     *
 *                                                               *
 *****************************************************************
 
@@ -18,22 +17,22 @@ Init           start startup
 
                phk
                plb
-               shortm
+               short m
                lda   #$41
                sta   >$C029
-               longm
+               long  m
                pea   0
-               pushlong   #Image
-               pushword   L_Image
-               pushlong   #PicPtr
-               pushlong   #PicSize
+               ph4   #Image
+               ph2   L_Image
+               ph4   #PicPtr
+               ph4   #PicSize
                _UnPackBytes
                bcs   Fin
                pla
-               shortm
+               short m
                lda   #$C1
                sta   >$C029
-               longm
+               long  m
 Fin            rtl
 
 PicPtr         dc    i4'$E12000'

@@ -45,7 +45,7 @@ merge: obj/merge.a
 obj/%.ROOT: obj/%.A
 
 macros/startup.mac: src/startup.asm
-	$(MACGEN) $< $@ 2/ainclude/m16.= 2/appleutil/m16.Util2
+	$(MACGEN) $< $@ 2/ainclude/m16.= 2/orcainclude/=
 
 obj/startup.a: src/startup.asm macros/startup.mac src/trivial.pak.asm
 	$(ASSEMBLE) $< keep=obj/$$
@@ -90,7 +90,7 @@ obj/sons.a: src/sons.asm src/clap.asm
 	$(ASSEMBLE) $< keep=obj/$$
 
 macros/dlgdata.mac: src/dlgdata.asm
-	$(MACGEN) $< $@ 2/ainclude/m16.= 2/appleutil/m16.Util2
+	$(MACGEN) $< $@ 2/ainclude/m16.= 2/appleutil/m16.Util2 2/orcainclude/=
 
 obj/dlgdata.a: src/dlgdata.asm macros/dlgdata.mac
 	$(ASSEMBLE) $< keep=obj/$$
