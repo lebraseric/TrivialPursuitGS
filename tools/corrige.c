@@ -26,6 +26,8 @@ Versions :
 #include <stdio.h>
 #include <string.h>
 #include <types.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define LBUFF   256
 
@@ -43,17 +45,15 @@ struct elemtable {
     long offset;
 } table[1000];
 
-int main();
-void corrige();
-void litligne();
-void strupr();
-void error();
+void corrige(char *action, FILE *lot);
+int compare(struct elemtable *q1, struct elemtable *q2);
+void litligne(void);
+void strupr(char *s);
+void fermelot(void);
+void error(char *s1, char *s2);
 
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
-    void fermelot();
     Boolean erreur = FALSE;
 
     if (argc > 1)
@@ -79,12 +79,9 @@ char *argv[];
          error("utilisation: corrige -v|-t [lot] [>sortie]", NULL);
 }
 
-void corrige(action, lot)
-char *action;
-FILE *lot;
+void corrige(char *action, FILE *lot)
 {
     int n, i = 0;
-    int compare();
 
     litligne();
     strupr(buffer);
@@ -115,8 +112,7 @@ FILE *lot;
     }
 }
 
-int compare(q1, q2)
-struct elemtable *q1, *q2;
+int compare(struct elemtable *q1, struct elemtable *q2)
 {
     long d;
 
@@ -124,25 +120,23 @@ struct elemtable *q1, *q2;
     return d ? (d > 0 ? 1 : -1) : 0;
 }
 
-void litligne()
+void litligne(void)
 {
     if (fgets(buffer, LBUFF, lot) == NULL && !feof(lot))
          error("corrige: erreur d'acces au fichier en entree", NULL);
 }
 
-void strupr(s)
-char *s;
+void strupr(char *s)
 {
     while (*s++ = toupper(*s));
 }
 
-void fermelot()
+void fermelot(void)
 {
     fclose(lot);
 }
 
-void error(s1, s2)
-char *s1, *s2;
+void error(char *s1, char *s2)
 {
     fprintf(stderr, s1, s2);
     fprintf(stderr, "\n");

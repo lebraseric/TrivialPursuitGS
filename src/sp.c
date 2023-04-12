@@ -196,7 +196,7 @@ int8_t sp_read(uint8_t dest, uint16_t len)
   return sp_error;
 }
 
-int8_t sp_find_fuji()
+int8_t sp_find_fuji(void)
 {
   // const char fuji[9] = "THE_FUJI";
   const char fuji[14] = "FUJINET_DISK_0";
@@ -225,7 +225,7 @@ int8_t sp_find_fuji()
   return 0;
 }
 
-int8_t sp_find_network()
+int8_t sp_find_network(void)
 {
   const char net[7] = "NETWORK";
   const uint8_t net_len = sizeof(net);

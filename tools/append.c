@@ -29,6 +29,7 @@ Versions :
 #include <MEMORY.H>
 #include <CTYPE.H>
 #include <ERRNO.H>
+#include <stdlib.h>
 
 #define LBUFF 256
 
@@ -60,21 +61,19 @@ char *msg[] =
        "Caract}re non accentuable"
    };
 
-void append(/* char *base, char *lot */);
-void openfiles(/* char *base, char *lot */);
-Boolean nouvbase(/* char *base */);
-void appendQuest();
-void analyseIdent();
-void code(/* char *orgbuff */);
-void addc(/* char c */);
-void erreur(/* Word n */);
-void errsys();
-void errcar(/* int n, char c */);
-void strupr(/* char *s */);
+void append(char *base, char *lot);
+void openfiles(char *base, char *lot);
+Boolean nouvbase(char *base);
+void appendQuest(void);
+void analyseIdent(void);
+void code(char *orgbuff);
+void addc(char c);
+void erreur(Word n);
+void errsys(void);
+void errcar(int n, char c);
+void strupr(char *s);
 
-main(argc, argv)
-int argc;
-char **argv;
+int main(int argc, char **argv)
 {
    if (argc != 3) erreur(0);
    printf("CONCATENATION DE LOTS DE QUESTIONS TRIVIAL PURSUIT\n");
@@ -82,8 +81,7 @@ char **argv;
    append(*(argv+1), *(argv+2));
 }
 
-void append(base, lot)
-char *base, *lot;
+void append(char *base, char *lot)
 {
    openfiles(base, lot);
    printf("Ajout du lot %s @ la base %s\n\n", lot, base);
@@ -95,8 +93,7 @@ char *base, *lot;
    fclose(findex);
 }
 
-void openfiles(base, lot)
-char *base, *lot;
+void openfiles(char *base, char *lot)
 {
    if (strlen(base) > 10) erreur(1);
    strcpy(index, base);
@@ -129,14 +126,13 @@ char *base, *lot;
    fseek(fdata, 0L, 2);
 }
 
-Boolean nouvbase(base)
-char *base;
+Boolean nouvbase(char *base)
 {
    printf("Base %s inexistante; la cr{er ? (o/n) ", base);
    return (tolower(getchar()) == 'o');
 }
 
-void appendQuest()
+void appendQuest(void)
 {
    Word l;
 
@@ -157,7 +153,7 @@ void appendQuest()
    }
 }
 
-void analyseIdent()
+void analyseIdent(void)
 {
    Word question, diff;
 
@@ -166,8 +162,7 @@ void analyseIdent()
    indrec.adrQuest = ftell(fdata);
 }
 
-void code(orgbuff)
-char *orgbuff;
+void code(char *orgbuff)
 {
    char accent;
 
@@ -253,8 +248,7 @@ char *orgbuff;
    addc('\000');
 }
 
-void addc(c)
-char c;
+void addc(char c)
 {
    ut.utw |= c << (5 * t + 1);
    if (t)
@@ -270,29 +264,25 @@ char c;
    }
 }
 
-void erreur(n)
-Word n;
+void erreur(Word n)
 {
    printf("%s\n", *(msg+n));
    exit(n);
 }
 
-void errsys()
+void errsys(void)
 {
    printf("%s %d\n", *(msg+3), errno);
    exit(1);
 }
 
-void errcar(n, c)
-int n;
-char c;
+void errcar(int n, char c)
 {
    printf("%s : %c\n", *(msg+n), c);
    exit(n);
 }
 
-void strupr(s)
-register char *s;
+void strupr(register char *s)
 {
    while(*s++ = toupper(*s));
 }

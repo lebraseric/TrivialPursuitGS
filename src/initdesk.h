@@ -13,7 +13,7 @@
 
 extern Word MyID;
 
-int init_startup();
+int init_startup(void);
 void check_difficulty_menu(void);
 void SysErr(void);
 

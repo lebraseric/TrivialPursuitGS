@@ -8,6 +8,7 @@
 #include "initdesk.h"
 #include "dialogs.h"
 #include "jfen.h"
+#include "desk.h"
 
 #include <types.h>
 #include <string.h>

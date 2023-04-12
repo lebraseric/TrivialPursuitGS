@@ -23,6 +23,7 @@ Auteur : Eric Le Bras
 #include <CTYPE.H>
 #include <STRING.H>
 #include <ERRNO.H>
+#include <stdlib.h>
 
 #define LBUFF 256
 
@@ -49,30 +50,28 @@ word sdiff[6][3] = { {0,0,0}, {0,0,0}, {0,0,0} };
 word ancCarte = 0;
 boolean anom = FALSE;
 
-boolean control();
-void controlCarte();
-void controlQuestion();
-void testeQuestion();
-void analyseIdent();
-void warn();
-void manqueQuestion();
-void questionEnTrop();
-void litLigne();
-void prLigne();
-void prStat();
-void erreur();
-void errnum();
+boolean control(char *lot);
+void controlCarte(void);
+void controlQuestion(word i);
+void testeQuestion(void);
+void analyseIdent(void);
+void warn(word n);
+void manqueQuestion(word n);
+void questionEnTrop(word n);
+void litLigne(char *buffer, int l, FILE *stream);
+void prLigne(char *buffer);
+void prStat(void);
+void strupr(char *s);
+void erreur(word n);
+void errnum(int n);
 
-main(argc, argv)
-int argc;
-char **argv;
+int main(int argc, char **argv)
 {
         if (argc != 2) erreur(0);
         exit(control(*(argv+1)));
 }
 
-boolean control(lot)
-char *lot;
+boolean control(char *lot)
 {
         if (!(flot = fopen(lot,"r")))
                 if (errno == ENOENT)
@@ -93,7 +92,7 @@ char *lot;
         return anom;
 }
 
-void controlCarte()
+void controlCarte(void)
 {
         word i;
 
@@ -114,8 +113,7 @@ void controlCarte()
         }
 }
 
-void controlQuestion(i)
-word i;
+void controlQuestion(word i)
 {
         if (*buffer != '#') {
                 warn(5);
@@ -137,7 +135,7 @@ word i;
         }
 }
 
-void testeQuestion()
+void testeQuestion(void)
 {
         litLigne(buffer, LBUFF, flot);
         if (*buffer == '#')
@@ -151,46 +149,39 @@ void testeQuestion()
         }
 }
 
-void analyseIdent()
+void analyseIdent(void)
 {
         sscanf(buffer, "#%u,%u,%u", &carte, &question, &diff);
         total++;
         sdiff[question-1][diff-1]++;
 }
 
-void warn(n)
-word n;
+void warn(word n)
 {
         prLigne(buffer);
         printf("   -> %s\n", msg[n]);
 }
 
-void manqueQuestion(n)
-word n;
+void manqueQuestion(word n)
 {
         prLigne(buffer);
         printf("   -> manque question n[%u\n", n);
 }
 
-void questionEnTrop(n)
-word n;
+void questionEnTrop(word n)
 {
         prLigne(buffer);
         printf("   -> la question %u est en trop\n", n);
 }
 
-void litLigne(buffer, l, stream)
-char *buffer;
-int l;
-FILE *stream;
+void litLigne(char *buffer, int l, FILE *stream)
 {
         if (!fgets(buffer, l, stream) && !feof(flot)) errnum(errno);
         ligne++;
         if (*buffer == '#') analyseIdent();
 }
 
-void prLigne(buffer)
-char *buffer;
+void prLigne(char *buffer)
 {
         char *p;
 
@@ -200,7 +191,7 @@ char *buffer;
         anom = TRUE;
 }
 
-void prStat()
+void prStat(void)
 {
         word i, j, tdiff[3];
 
@@ -221,21 +212,18 @@ void prStat()
         printf("\n");
 }
 
-strupr(s)
-register char *s;
+void strupr(register char *s)
 {
         while(*s++ = islower(*s) ? _toupper(*s) : *s);
 }
 
-void erreur(n)
-word n;
+void erreur(word n)
 {
         printf("%s\n", *(msg+n));
         exit(n);
 }
 
-void errnum(n)
-int n;
+void errnum(int n)
 {
         printf("%s %d\n", *(msg+1), n);
         exit(1);

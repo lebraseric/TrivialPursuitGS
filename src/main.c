@@ -8,9 +8,12 @@
 #include "typedefs.h"
 #include "initdesk.h"
 #include "desk.h"
+#include "jfen.h"
 #include "sounds.h"
 #include "os.h"
 #include "dialogs.h"
+#include "game.h"
+#include "sp.h"
 
 /*  Headers C standards  */
 
@@ -36,7 +39,7 @@ static void ActivationFen(void);
 static void ExecMenu(const int art, int *quit);
 static void DoSetDiff(int article);
 
-int main()
+int main(int argc, char *argv[])
 {
     int result;
     const Pointer border = (Pointer)0x00e1c034;

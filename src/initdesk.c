@@ -15,6 +15,7 @@
 #include "os.h"
 #include "dialogs.h"
 #include "jfen.h"
+#include "game.h"
 
 #include <event.h>
 #include <quickdraw.h>
@@ -50,7 +51,7 @@ static void unpack_background(void);
 static void init_fonts(void);
 static void cycle_colors(void);
 
-int init_startup()
+int init_startup(void)
 {
     int result;
 

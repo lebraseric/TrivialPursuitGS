@@ -19,11 +19,13 @@ Date : 10 Octobre 1989
 
 */
 
+#include "typedefs.h"
 #include <STDIO.H>
 #include <ERRNO.H>
 #include <STRING.H>
 #include <TYPES.H>
-#include "typedefs.h"
+#include <stdlib.h>
+#include <ctype.h>
 
 #define LBUFF 1024
 
@@ -38,19 +40,17 @@ char *msg[] = {
    "Nombre de questions erron{"
 };
 
-void merge();
-void openfiles();
-void errfic();
-void writeinfo();
-char *convstr();
-void writeindex();
-void writedata();
-void erreur();
-void errnum();
+void merge(char *base);
+void openfiles(char *base);
+void errfic(char *nomfic);
+void writeinfo(void);
+char *convstr(char *dest, char *src);
+void writeindex(void);
+void writedata(void);
+void erreur(word n);
+void errnum(void);
 
-main(argc, argv)
-int argc;
-char **argv;
+int main(int argc, char **argv)
 {
    if (argc != 2) erreur(0);
    printf("GENERATION DE BASES DE QUESTIONS TRIVIAL PURSUIT\n");
@@ -58,8 +58,7 @@ char **argv;
    merge(*(argv+1));
 }
 
-void merge(base)
-char *base;
+void merge(char *base)
 {
    openfiles(base);
    printf("G{n{ration de la base %s\n", base);
@@ -72,8 +71,7 @@ char *base;
    fclose(fbase);
 }
 
-void openfiles(base)
-char *base;
+void openfiles(char *base)
 {
    char nomfic[16];
    word l;
@@ -101,14 +99,13 @@ char *base;
    if (!(fbase = fopen(base, "wb"))) errnum();
 }
 
-void errfic(nomfic)
-char *nomfic;
+void errfic(char *nomfic)
 {
    printf("%s : %s\n", *(msg+2), nomfic);
    exit(2);
 }
 
-void writeinfo()
+void writeinfo(void)
 {
    word linfo;
 
@@ -136,8 +133,7 @@ void writeinfo()
    if (!fwrite((char *)&infoRec, sizeof(infoRec), 1, fbase)) errnum();
 }
 
-char *convstr(dest, src)
-char *dest, *src;
+char *convstr(char *dest, char *src)
 {
    char *p = dest;
 
@@ -179,7 +175,7 @@ char *dest, *src;
    return p;
 }
 
-void writeindex()
+void writeindex(void)
 {
    word offset, i;
    struct {
@@ -198,7 +194,7 @@ void writeindex()
    }
 }
 
-void writedata()
+void writedata(void)
 {
    word ldata;
 
@@ -212,14 +208,13 @@ void writedata()
    }
 }
 
-void erreur(n)
-word n;
+void erreur(word n)
 {
    printf("%s\n", *(msg+n));
    exit(n);
 }
 
-void errnum()
+void errnum(void)
 {
    printf("%s %d\n", *(msg+1), errno);
    exit(1);

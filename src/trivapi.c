@@ -2,7 +2,6 @@
  *  trivapi.c -- The Trivia API queries
  */
 
-
 segment "fujinet";
 
 #include "trivapi.h"
@@ -11,6 +10,7 @@ segment "fujinet";
 #include "trivial.h"
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 #include <window.h>
 
 static void make_url(const tQuestion *question, char *url);

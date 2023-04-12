@@ -22,6 +22,7 @@
 #include <font.h>
 #include <qdaux.h>
 #include <gsos.h>
+#include <stdlib.h>
 
 
 GrafPortPtr joueursDialog;
