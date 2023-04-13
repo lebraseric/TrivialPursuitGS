@@ -22,6 +22,7 @@
 #include <dialog.h>
 #include <qdaux.h>
 #include <menu.h>
+#include <stdlib.h>
 
 
 static struct {
@@ -246,12 +247,11 @@ pascal void DessineFond(void)
         &pionCentreIcon,
         &pionDeIcon
     };
-    int dbr;
     Word i;
     Rect r;
     LocInfo source;
 
-    // Preserve data bank (see note in Toolbox Reference vol.2 p.25-43)
+    /* Preserve data bank (see note in Toolbox Reference vol.2 p.25-43) */
     asm {
         phb
         phk

@@ -116,7 +116,6 @@ static Word InitTools(Word mode)
                    27,0x0100,      /* Font Manager    */
                    28,0x0100,      /* List Manager    */
                   };            /* Tool Locator data structure */
-   int ResultCode;
    char *z;
    char **pgzero;
 

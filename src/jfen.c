@@ -36,7 +36,7 @@ void InitJoueursDialog(void)
     static WindColor jFenColors = { 0x0050, 0, 0, 0 };
     static Rect partsRect = { 16, 20, 149, 95 };
     static BoxColors jCaseColors = { 0, 0xed, 0xe8, 0xed };
-    int i, j;
+    int i;
     Rect r;
 
     SetPort(joueursDialog = NewModelessDialog(&jFenBoundsRect,
