@@ -46,7 +46,7 @@ struct elemtable {
 } table[1000];
 
 void corrige(char *action, FILE *lot);
-int compare(struct elemtable *q1, struct elemtable *q2);
+int compare(const void *q1, const void *q2);
 void litligne(void);
 void strupr(char *s);
 void fermelot(void);
@@ -81,7 +81,8 @@ int main(int argc, char *argv[])
 
 void corrige(char *action, FILE *lot)
 {
-    int n, i = 0;
+    size_t n; 
+    int i = 0;
 
     litligne();
     strupr(buffer);
@@ -98,7 +99,7 @@ void corrige(char *action, FILE *lot)
          }
     }
     fprintf(stderr, "corrige: tri\n");
-    qsort(table, n, sizeof(*table), compare);
+    qsort((void *)table, (size_t)n, (size_t)sizeof(table[0]), compare);
     fprintf(stderr, "corrige: copie du fichier trie\n");
     printf("GENUS\n");
     for (i = 0; i < n; i++) {
@@ -112,11 +113,12 @@ void corrige(char *action, FILE *lot)
     }
 }
 
-int compare(struct elemtable *q1, struct elemtable *q2)
+int compare(const void *q1, const void *q2)
 {
     long d;
 
-    d = q1->ucle.cle - q2->ucle.cle;
+    d = ((struct elemtable *)q1)->ucle.cle
+      - ((struct elemtable *)q2)->ucle.cle;
     return d ? (d > 0 ? 1 : -1) : 0;
 }
 

@@ -28,7 +28,7 @@
 #include <memory.h>
 #include <INTMATH.H>
 #include <SOUND.H>
-// #include <MJUKE.H>
+/* #include <MJUKE.H> */
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,7 +37,7 @@ Word MyID;
 Ecran **imageHdl;
 tInfoRec InfoRec;
 Jeu jeu;
-// Word MJStart=0;
+/* Word MJStart=0; */
 
 static Ref ToolRecRef;
 static Pointer Video = (Pointer)0xc029;
@@ -58,7 +58,7 @@ int init_startup(void)
     if ((result = InitTools(mode320)) > 0)
         return result;
     sp_init();
-    srand((word)TickCount());   // Set random generator seed
+    srand((word)TickCount());   /* Set random generator seed */
     init_menus();
     unpack_background();
     SetColorTable(0, (**imageHdl).tableCoul[0]);
@@ -193,9 +193,9 @@ static void CloseTools(void)
 {
    ShutDownTools(0, ToolRecRef);
 
-//    if (MJStart)
-//         MJShutDown();
-//    else
+/*    if (MJStart)
+         MJShutDown();
+    else */
         SoundShutDown();
 
    MMShutDown(MyID);
@@ -204,7 +204,7 @@ static void CloseTools(void)
 
 static void init_menus(void)
 {
-    const char *menus[] = {
+    char *menus[] = {
 ">> Questions \\N5\r\
 --Facile \\N270*11\r\
 --Moyen \\N271*22\r\
@@ -250,7 +250,7 @@ static void unpack_background(void)
     if (_toolErr)
         SysErr();
     HLock((Handle)imageHdl);
-    AdrImage = *imageHdl;   // This pointer will be modified by UnPackBytes
+    AdrImage = *imageHdl;   /* This pointer will be modified by UnPackBytes */
     UnPackBytes(fondEcran.data, fondEcran.length, (Handle)&AdrImage, &size);
     HUnlock((Handle)imageHdl);
 }

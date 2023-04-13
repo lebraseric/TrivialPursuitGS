@@ -272,7 +272,7 @@ pascal void DessineFond(void)
         for (i = 0; i < pJeu.ndest; i++)
             DrawIcon((Pointer)pion[cases[pJeu.dest[i]].type & 0x0f], 0,
                             cases[pJeu.dest[i]].x-10, cases[pJeu.dest[i]].y-8);
-    // Restore data bank
+    /* Restore data bank */
     asm {
         plb
     }

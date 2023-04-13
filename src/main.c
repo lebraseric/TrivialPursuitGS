@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     uint8_t old_border;
 
     old_border = *border;
-    *border = 0x04; // Dark green border
+    *border = 0x04; /* Dark green border */
     if ((result = init_startup()) > 0)
         return result;
     event_loop();

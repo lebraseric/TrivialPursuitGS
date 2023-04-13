@@ -34,25 +34,25 @@ static void json_query(uint8_t sp_net, const char *query, char *str,
 
 int trivapi_GetQuestion(tQuestion *question)
 {
-  const char url[120];
+  char url[120];
   int result;
 
-  make_url(question, url);  // Build URL for trivial API
+  make_url(question, url);  /* Build URL for trivial API */
 
-  if ((result = sp_open(sp_net)) > 0) // Open the network device
+  if ((result = sp_open(sp_net)) > 0)
     return result;
-  if ((result = net_open_url(sp_net, 0x0C, 0x80, url)) > 0) // Open URL
+  if ((result = net_open_url(sp_net, 0x0C, 0x80, url)) > 0)
     return result;
   if ((result = net_set_json(sp_net)) > 0)
     return result;
-  if ((result = sp_control(sp_net,'P')) > 0) // Parse the JSON
+  if ((result = sp_control(sp_net,'P')) > 0) /* Parse the JSON */
     return result;
 
-  copy_json_data(sp_net, question); // Copy JSON data to question
+  copy_json_data(sp_net, question);
 
-  if ((result = net_close_url(sp_net)) > 0)  // Close URL
+  if ((result = net_close_url(sp_net)) > 0)
     return result;
-  return sp_close(sp_net); // Close the network device and return
+  return sp_close(sp_net);
 }
 
 static void make_url(const tQuestion *question, char *url)
@@ -107,12 +107,12 @@ static void json_query(uint8_t sp_net, const char *query, char *str,
   memset(sp_payload, 0, sizeof(sp_payload));
   sp_payload[idx++] = strlen(query);
   sp_payload[idx++] = 0;
-  strcpy(&sp_payload[idx++], query);
-  sp_control(sp_net, 'Q'); // Query
-  sp_status(sp_net, 'S'); // Get Status
+  strcpy((char *)&sp_payload[idx++], query);
+  sp_control(sp_net, 'Q'); /* Query */
+  sp_status(sp_net, 'S'); /* Get Status */
   len=(unsigned short)sp_payload[0];
   memset(sp_payload, 0, sizeof(sp_payload));
-  sp_read(sp_net, len); // Get Result
+  sp_read(sp_net, len); /* Get Result */
   sp_payload[len] = '\0';
-  strncpy(str, sp_payload, size); // Copy to dest
+  strncpy(str, (char *)sp_payload, size);
 }

@@ -36,7 +36,7 @@ void JoueSon(DataBlock *sound, Word speed)
     sonParms.bufferSize = 0;
     sonParms.volSetting = 250;
     sonParms.nextWavePtr = 0;
-    for (i = 0; i < 15; i++)    // Loop if generator already in use
+    for (i = 0; i < 15; i++)    /* Loop if generator already in use */
     {
         FFStopSound(0x0001 << i);
         FFStartSound(0x0001 | i << 8 | i << 12, (Pointer)&sonParms);

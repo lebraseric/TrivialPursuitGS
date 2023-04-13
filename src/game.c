@@ -19,7 +19,7 @@ void DoNouveau(void)
 {
     Word i;
 
-    if (jeu.action) // Game already running
+    if (jeu.action) /* Game already running */
         Fermer();
     if (!jeu.action) {
         for (i = 0; i < 6; i++) {
