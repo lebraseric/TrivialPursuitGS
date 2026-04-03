@@ -7,16 +7,15 @@
 
 #include "typedefs.h"
 #include <qdaux.h>
-#include <dialog.h>
 #include <types.h> 
 
 
-// Screen background
+/* Screen background */
 
 extern DataBlock fondEcran;
 
 
-// Icons
+/* Icons */
 
 extern QDIconRecord homme1Icon;
 extern QDIconRecord homme2Icon;
@@ -37,14 +36,7 @@ extern QDIconRecord Un, Deux, Trois, Quatre, Cinq, Six, Cliquer;
 extern QDIconRecord camembertIcon;
 
 
-// Dialogs data
-
-extern DialogTemplate infosTemp;
-extern DialogTemplate themeTemp;
-extern StringPtr themeBut1,themeBut2,themeBut3,themeBut4,themeBut5,themeBut6;
-
-
-// Sounds
+/* Sounds */
 
 extern DataBlock dice;
 extern DataBlock yeah;
@@ -52,7 +44,7 @@ extern DataBlock clap;
 extern DataBlock decu;
 
 
-// Globals
+/* Globals */
 
 extern char titreActif[];
 extern char titreInactif[];

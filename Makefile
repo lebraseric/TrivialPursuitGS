@@ -7,11 +7,11 @@ ASSEMBLE = iix assemble
 LINK = iix link
 MACGEN = iix macgen
 
-CFLAGS = -I -P +T cc=-i"src"
+CFLAGS = -I -P +T +F cc=-i"src"
 
 OBJECTS = obj/startup.a obj/main.a obj/dialogs.a obj/desk.a obj/jfen.a \
 	obj/os.a obj/initdesk.a obj/sounds.a obj/sp.a obj/net.a obj/trivapi.a \
-	obj/game.a obj/ticons.a obj/sons.a obj/dlgdata.a
+	obj/game.a obj/ticons.a obj/sons.a obj/dlgdata.a obj/textdata.a
 
 all : obj macros $(TARGETS)
 
@@ -25,9 +25,9 @@ obj macros:
 
 trivial: $(OBJECTS)
 	$(LINK) \
-	obj/startup obj/main obj/dialogs obj/desk obj/jfen obj/os \
-	obj/initdesk obj/ticons obj/sons obj/dlgdata obj/sounds \
-	obj/sp obj/net obj/trivapi obj/game \
+	obj/startup obj/main obj/dialogs obj/desk obj/jfen obj/os obj/initdesk \
+	obj/ticons obj/sons obj/dlgdata obj/textdata obj/sounds obj/sp obj/net \
+	obj/trivapi obj/game \
 	keep=$@
 
 append: obj/append.a
@@ -89,10 +89,13 @@ obj/ticons.a: src/ticons.asm src/fond.pak.asm
 obj/sons.a: src/sons.asm src/clap.asm
 	$(ASSEMBLE) $< keep=obj/$$
 
-macros/dlgdata.mac: src/dlgdata.asm
-	$(MACGEN) $< $@ 2/ainclude/m16.= 2/appleutil/m16.Util2 2/orcainclude/=
+obj/dlgdata.a: src/dlgdata.asm
+	$(ASSEMBLE) $< keep=obj/$$
 
-obj/dlgdata.a: src/dlgdata.asm macros/dlgdata.mac
+macros/textdata.mac: src/textdata.asm
+	$(MACGEN) $< $@ 2/appleutil/m16.Util2
+
+obj/textdata.a: src/textdata.asm macros/textdata.mac
 	$(ASSEMBLE) $< keep=obj/$$
 
 obj/append.a: tools/append.c

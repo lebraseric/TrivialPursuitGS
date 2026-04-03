@@ -7,6 +7,7 @@ segment "dialogs";
 /*  Header application  */
 
 #include "trivial.h"
+#include "dlgdata.h"
 #include "sounds.h"
 #include "desk.h"
 #include "dialogs.h"
@@ -21,6 +22,7 @@ segment "dialogs";
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 
 /*  Headers Toolbox  */
@@ -35,8 +37,7 @@ segment "dialogs";
 #include <gsos.h>
 #include <control.h>
 #include <lineedit.h>
-// #include <mjuke.h>
-
+/* #include <mjuke.h> */
 
 static pascal int filterBase(long);
 static pascal int filterOuvrir(long);
@@ -343,7 +344,7 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
          TRUE, 0L,
          { &bOkInfo, 0L } };
 
-    // MJPlay(1);
+    /* MJPlay(1); */
 
     SetRect(&rInfo,5, 5,295,160);
 
@@ -373,8 +374,40 @@ tout cela via le serveur. \r Nos amiti\216s \210 tous, et \r\r \
         ItemHit = ModalDialog(0L);
         CloseDialog(dlgInfo);
     }
-    // MJStop();
+    /* MJStop(); */
     SetPort(oldPort);
+}
+
+void DoTriviaSource(void)
+{/*
+    const ItemTemplate OK = {
+        ok,
+        {125, 136, 139, 221},
+        buttonItem,
+        "\pOK",
+        0,
+        0,
+        NIL
+    };
+    const ItemTemplate annuler = {
+        cancel,
+        {125, 25, 139, 110},
+        buttonItem,
+        text_DoTriviaSource[0],
+        0,
+        0,
+        NULL
+    };
+    const ItemTemplate nomDesJoueurs = {
+        67,
+        {6, 24, 20, 223},
+        longStatText2+itemDisable,
+        text_DoTriviaSource[1],
+        sizeof(text_DoTriviaSource[1]),
+        0,
+        NULL
+    };
+*/
 }
 
 void DoNoms(void)
@@ -478,7 +511,7 @@ void DoNoms(void)
         }
     };
     GrafPortPtr dlgJoueurs;
-    Word i, j, itemHit;
+    Word i, itemHit;
 
     for (i = 0; i < 6; i++)
         memcpy(nomStr[i], pJeu.joueur[i].nom, LNOM);
@@ -614,7 +647,7 @@ void DoInfos(void)
     Word i;
     char mask[8];
 
-    infosDlg = GetNewModalDialog(&infosTemp);
+    infosDlg = GetNewModalDialog(&infosTmpl);
     oldPort = GetPort();
     SetPort(infosDlg);
     MoveTo(57, 30);
@@ -674,10 +707,10 @@ Word ChoixTheme(void)
     for (i = 0; i < 6; i++) {
         if (!(*themeLibel[i] = (StringPtr)malloc(sizeof(Str255))))
             SysErr();
-        strcpy((*themeLibel[i])->text, InfoRec.theme[i]);
-        (*themeLibel[i])->textLength = strlen((*themeLibel[i])->text);
+        strcpy((char *)(*themeLibel[i])->text, InfoRec.theme[i]);
+        (*themeLibel[i])->textLength = strlen((char *)(*themeLibel[i])->text);
     }
-    themeDlg = GetNewModalDialog(&themeTemp);
+    themeDlg = GetNewModalDialog(&themeTmpl);
     t = ModalDialog(0l);
     CloseDialog(themeDlg);
     for (i = 0; i < 6; i++)
@@ -864,7 +897,6 @@ static Word Compare(char *qRep, char *jRep)
 {
      int i=0;
      char cqRep[255];
-     char comparaison[5];
 
      p2cstr(jRep);
 
