@@ -1,0 +1,12 @@
+# Compiled binaries
+trivial
+append
+control
+corrige
+merge
+
+# Object files
+obj/
+
+# Macros
+macros/
